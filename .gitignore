@@ -4,3 +4,6 @@
 *.jar
 *.war
 *.ear
+
+# Properies Credentials #
+s3credential.properties
