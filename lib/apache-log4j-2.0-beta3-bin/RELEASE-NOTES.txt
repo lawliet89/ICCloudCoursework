@@ -1,0 +1,50 @@
+
+              Apache Log4j 2.0-beta3 RELEASE NOTES
+
+The Apache Log4j 2 team is pleased to announce the Log4j 2.0-beta3 release!
+
+Apache Log4j 2.0-beta3 requires a minimum of Java 5 to build and run. Basic compatibility with
+Log4j 1.x is provided through the log4j12-api component, however it does not implement some of the
+very implementation specific classes and methods. The package names and Maven groupId have been changed to
+org.apache.logging.log4j to avoid any conflicts with log4j 1.x.
+
+Bug fixes and enhancements
+
+Changes in this version include:
+
+New features:
+o LOG4J2-28:  Added PropertiesRewritePolicy and ability to define properties on a Logger. 
+o LOG4J2-55:  Added ability to configure from an InputSource. 
+
+Fixed Bugs:
+o LOG4J2-108:  Fix NullPointerException in ClassLoaderContextSelector when no class is returned from
+        the SecurityManager. 
+o LOG4J2-107:  PatternParser was not properly handling adjacent nested options 
+o LOG4J2-95:  Add support for loading plugins inside the OSGi bundle. 
+o LOG4J2-103:  The LogEvent was wrapping a ThrowableProxy with another ThrowableProxy when deserializing. Thanks to Das Archive. 
+o LOG4J2-104:  Convert LogManager binding to use "regular" java properties instead of XML properties to workaround a
+        bug in Oracle's xmlparserv2 jar. 
+o LOG4J2-102:  The Facility value was being improperly calculated. Thanks to Emanuele Colombo. 
+o LOG4J2-101:  A NullPointerException would occur if no format value was passed to the SyslogAppender. Thanks to Emanuele Colombo. 
+o LOG4J2-99:  MapRewritePolicy had an extra call to putAll that caused updates to behave like adds. Thanks to Das Archive. 
+o Avoid NPE when duplicate LoggerContextFactorys are present. Allow factories to specify a weight to allow
+        real implementations to outrank test implementations. Provide a simple default LoggerContextFactory. 
+o LOG4J2-97:  Added several missing classes and methods for Log4j 1.x compatibility. 
+o LOG4J2-94:  Interpolator was not stripping Lookup key separator when trying to locate the default value for a variable. Thanks to Denis Treskunov. 
+o Log4j 1.2 Category.forcedLog was wrapping the message with an ObjectMessage even if the parameter was an
+        ObjectMessage. 
+
+Changes:
+o LOG4J2-105:  Add ability to customize the names of the Levels in the LevelPatternConverter. 
+o LOG4J2-85:  Add ThreadContext.push(String format, Object... args) 
+o Created combined jar to combine API and Core contents for users who only want the Log4j implementation. 
+o LOG4J2-87:  Build pdf of user's guide. 
+o LOG4J2-29:  Added font and fontSize parameters to HTMLLayout. Replace newlines in message with br tag. 
+
+
+For complete information on Apache Log4j 2, including instructions on how to submit bug reports,
+patches, or suggestions for improvement, see the Apache Apache Log4j 2 website:
+
+http://logging.apache.org/log4j/2.x/
+
+
