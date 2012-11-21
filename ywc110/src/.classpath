@@ -1,49 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="../../lib/jets3t/jars/cockpit-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../lib/jets3t/jars/cockpitlite-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../lib/jets3t/jars/jets3t-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../lib/jets3t/jars/jets3t-gui-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../lib/jets3t/jars/synchronize-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../lib/jets3t/jars/uploader-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../lib/httpcomponents-client/lib/commons-codec-1.6.jar"/>
-	<classpathentry kind="lib" path="../../lib/httpcomponents-client/lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="../../lib/httpcomponents-client/lib/fluent-hc-4.2.2.jar"/>
-	<classpathentry kind="lib" path="../../lib/httpcomponents-client/lib/httpclient-4.2.2.jar"/>
-	<classpathentry kind="lib" path="../../lib/httpcomponents-client/lib/httpclient-cache-4.2.2.jar"/>
-	<classpathentry kind="lib" path="../../lib/httpcomponents-client/lib/httpcore-4.2.2.jar"/>
-	<classpathentry kind="lib" path="../../lib/httpcomponents-client/lib/httpmime-4.2.2.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j12-api-2.0-beta3.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j12-api-2.0-beta3-javadoc.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j12-api-2.0-beta3-sources.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-api-2.0-beta3.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-api-2.0-beta3-javadoc.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-api-2.0-beta3-sources.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-core-2.0-beta3.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-core-2.0-beta3-javadoc.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-core-2.0-beta3-sources.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-core-2.0-beta3-tests.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-flume-ng-2.0-beta3.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-flume-ng-2.0-beta3-javadoc.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-flume-ng-2.0-beta3-sources.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-jcl-2.0-beta3.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-jcl-2.0-beta3-javadoc.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-jcl-2.0-beta3-sources.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-slf4j-impl-2.0-beta3.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-slf4j-impl-2.0-beta3-javadoc.jar"/>
-	<classpathentry kind="lib" path="../../lib/apache-log4j-2.0-beta3-bin/log4j-slf4j-impl-2.0-beta3-sources.jar"/>
+	<classpathentry kind="lib" path="../../lib/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="../../lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="../../lib/httpclient-4.2.2.jar"/>
+	<classpathentry kind="lib" path="../../lib/httpcore-4.2.2.jar"/>
 	<classpathentry kind="lib" path="../../lib/java-xmlbuilder-0.4.jar"/>
-	<classpathentry kind="lib" path="../../lib/bcprov-jdk15on-147.jar"/>
-	<classpathentry kind="lib" path="../../lib/axis-1_4/lib/axis.jar"/>
-	<classpathentry kind="lib" path="../../lib/axis-1_4/lib/axis-ant.jar"/>
-	<classpathentry kind="lib" path="../../lib/axis-1_4/lib/commons-discovery-0.2.jar"/>
-	<classpathentry kind="lib" path="../../lib/axis-1_4/lib/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="../../lib/axis-1_4/lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="../../lib/axis-1_4/lib/log4j-1.2.8.jar"/>
-	<classpathentry kind="lib" path="../../lib/axis-1_4/lib/saaj.jar"/>
-	<classpathentry kind="lib" path="../../lib/axis-1_4/lib/wsdl4j-1.5.1.jar"/>
-	<classpathentry kind="lib" path="../../lib/bare-bones-browser-launch-3.1.jar"/>
+	<classpathentry kind="lib" path="../../lib/jets3t-0.9.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
