@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -35,7 +36,13 @@ public class MusicKerberos extends KerberosAuth {
 	private static final String FORM_USERID_NAME = "userId";
 	private static final String FORM_PASSWORD_NAME = "password";
 	private static final String KERBEROS_REALM = "IC.AC.UK";
-
+	
+	private static final String AUTH_BASE = "/WEB-INF/conf/";
+	private static final String LOGIN_CONF = AUTH_BASE + "jaas.conf";
+	private static final String KRB5_CONF = AUTH_BASE + "krb5.conf";
+	private static final String AUTH_ATTRIBUTE = "CloudMusicAuth";
+	
+	
 	private HttpSession session;
 	private HttpServletRequest request;
 	private HttpServletResponse response;	// Debugging purposes
@@ -231,5 +238,33 @@ public class MusicKerberos extends KerberosAuth {
 			e.printStackTrace();
 		}
 		
+	}
+
+	/**
+	 * Creates a MusicKeberos object to get authenticated user data based on the HttpRequest
+	 * 
+	 * @param request Request to contain the necessary user context information
+	 * @param context The HttpServlet calling the method
+	 * @return The object
+	 * @throws LoginException
+	 * @throws SecurityException
+	 */
+	public static MusicKerberos createMusicKerberos(HttpServletRequest request, HttpServlet context)
+		throws LoginException, SecurityException {
+		// We will store a cache of the object for each HTTP Request
+		Object cache = request.getAttribute(AUTH_ATTRIBUTE);
+		if (cache != null){
+			if (cache instanceof MusicKerberos)
+				return (MusicKerberos) cache;
+		}
+		MusicKerberos obj = new MusicKerberos(AUTH_ATTRIBUTE,
+				context.getServletContext().getRealPath(LOGIN_CONF),
+				context.getServletContext().getRealPath(KRB5_CONF),
+				request);
+		// Attempt to authenticate and populate
+		obj.authenticate(false);
+		
+		request.setAttribute(AUTH_ATTRIBUTE, obj);
+		return obj;
 	}
 }

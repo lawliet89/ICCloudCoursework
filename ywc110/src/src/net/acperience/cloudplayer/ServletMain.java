@@ -12,11 +12,10 @@ import org.jets3t.service.S3ServiceException;
 
 public class ServletMain extends HttpServlet {
 	private static final long serialVersionUID = -1418564285836413358L;
-	public static final String CREDENTIALS_PATH = "/WEB-INF/properties/s3credential.properties";
-	public static final String JETS3_PATH = "/WEB-INF/properties/jets3t.properties";
 	public static final String TAG = "ServletMain";
 	
 	private S3Service s3Service;
+	private FileManager fileManager;
 	
 	public ServletMain(){
 		// ...
@@ -27,12 +26,14 @@ public class ServletMain extends HttpServlet {
 		super.init();
 		// Get credentials object
 		try{
-			s3Service = MusicUtility.connect(getServletContext().getResourceAsStream(CREDENTIALS_PATH),
-					getServletContext().getResourceAsStream(JETS3_PATH));	
+			s3Service = MusicUtility.connect(getServletContext().getResourceAsStream(MusicUtility.CREDENTIALS_PATH),
+					getServletContext().getResourceAsStream(MusicUtility.JETS3_PATH));	
+			
+			fileManager = new FileManager(this);
 		}
 		catch (IOException e){
 			e.printStackTrace();
-			throw new RuntimeException("S3 Credentials file (" + CREDENTIALS_PATH + ") or Jets3 file cannot be found and loaded.");
+			throw new RuntimeException("S3 Credentials file (" + MusicUtility.CREDENTIALS_PATH + ") or Jets3 file cannot be found and loaded.");
 		}
 		catch (S3ServiceException e){
 			e.printStackTrace();
@@ -79,7 +80,7 @@ public class ServletMain extends HttpServlet {
     	response.setContentType("text/html;charset=UTF-8");
     	try {
     		//First up, check that user is logged in
-			MusicKerberos user = ServletAuth.createMusicKerberos(request, this);
+			MusicKerberos user = MusicKerberos.createMusicKerberos(request, this);
 			if (!user.isAuthenticated()){
 				response.sendRedirect("/auth");
 				return;

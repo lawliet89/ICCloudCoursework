@@ -25,6 +25,8 @@ public final class MusicUtility {
     public static final String TPL_DIR = "/WEB-INF/template/";
     
     public static final int SECURE_PORT = 60000;
+	public static final String CREDENTIALS_PATH = "/WEB-INF/properties/s3credential.properties";
+	public static final String JETS3_PATH = "/WEB-INF/properties/jets3t.properties";
     
     private MusicUtility(){
     	// Cannot be instantiated.

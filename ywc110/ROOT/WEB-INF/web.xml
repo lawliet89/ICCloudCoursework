@@ -38,6 +38,17 @@
       <url-pattern>/auth</url-pattern>
     </servlet-mapping>   
     
+     <servlet>
+      <servlet-name>ServletUpload</servlet-name>
+      <servlet-class>net.acperience.cloudplayer.ServletUpload</servlet-class>
+      <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>ServletUpload</servlet-name>
+      <url-pattern>/upload</url-pattern>
+    </servlet-mapping>       
+    
     <!-- for static files -->
 <!--    <servlet-mapping>  
         <servlet-name>default</servlet-name>

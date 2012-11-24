@@ -10,12 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class ServletAuth extends HttpServlet{
-	
-	private static final String AUTH_ATTRIBUTE = "CloudMusicAuth";
-	private static final String AUTH_BASE = "/WEB-INF/conf/";
-	private static final String LOGIN_CONF = AUTH_BASE + "jaas.conf";
-	private static final String KRB5_CONF = AUTH_BASE + "krb5.conf";
-	
+		
 	public ServletAuth(){
 		// ...
 	}
@@ -45,7 +40,7 @@ public class ServletAuth extends HttpServlet{
 	    	
 	    	// Let's check if there's a ?logout request
 	    	if (request.getParameter("logout") != null)
-	    		createMusicKerberos(request, this).logout();
+	    		MusicKerberos.createMusicKerberos(request, this).logout();
 	    	
 	    	if (isUserAuthenticated(request)){
 	    		response.sendRedirect("/");
@@ -88,7 +83,7 @@ public class ServletAuth extends HttpServlet{
 	    	}
 	    	else{
 	    		// Attempt to login
-	    		MusicKerberos userAuth = createMusicKerberos(request, this);
+	    		MusicKerberos userAuth = MusicKerberos.createMusicKerberos(request, this);
 	    		// Do Login
 	    		userAuth.login();
 	    		// Check that user is authenticated again
@@ -128,34 +123,7 @@ public class ServletAuth extends HttpServlet{
     
     public boolean isUserAuthenticated(HttpServletRequest request) throws LoginException, SecurityException{
     	// Check if user has an authenticated session
-    	MusicKerberos obj = createMusicKerberos(request, this);
+    	MusicKerberos obj = MusicKerberos.createMusicKerberos(request, this);
     	return obj.isAuthenticated();
-    }
-    /**
-     * Creates a MusicKeberos object to get authenticated user data based on the HttpRequest
-     * 
-     * @param request Request to contain the necessary user context information
-     * @param context The HttpServlet calling the method
-     * @return The object
-     * @throws LoginException
-     * @throws SecurityException
-     */
-    public static MusicKerberos createMusicKerberos(HttpServletRequest request, HttpServlet context)
-    	throws LoginException, SecurityException {
-    	// We will store a cache of the object for each HTTP Request
-    	Object cache = request.getAttribute(AUTH_ATTRIBUTE);
-    	if (cache != null){
-    		if (cache instanceof MusicKerberos)
-    			return (MusicKerberos) cache;
-    	}
-    	MusicKerberos obj = new MusicKerberos(AUTH_ATTRIBUTE,
-    			context.getServletContext().getRealPath(LOGIN_CONF),
-    			context.getServletContext().getRealPath(KRB5_CONF),
-    			request);
-    	// Attempt to authenticate and populate
-    	obj.authenticate(false);
-    	
-    	request.setAttribute(AUTH_ATTRIBUTE, obj);
-    	return obj;
     }
 }
