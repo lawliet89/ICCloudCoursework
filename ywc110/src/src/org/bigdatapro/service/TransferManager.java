@@ -13,15 +13,15 @@ import org.jets3t.service.security.AWSCredentials;
 
 public class TransferManager {
 	
-    public static final String SAMPLES_PROPERTIES_NAME = "s3credential.properties";
+    public static String PROPERTIES_PATH = "s3credential.properties";
     public static final String S3_ACCESS_KEY_PROPERTY_NAME = "s3AccessKey";
     public static final String S3_SECRET_KEY_PROPERTY_NAME = "s3SecretKey";
     
     // Load S3 access and secret keys from the property file
     public static AWSCredentials loadKeys() throws IOException{
-    	InputStream propertiesIS = ClassLoader.getSystemResourceAsStream(SAMPLES_PROPERTIES_NAME);
+    	InputStream propertiesIS = ClassLoader.getSystemResourceAsStream(PROPERTIES_PATH);
     	if(propertiesIS == null) {
-    		throw new RuntimeException("property file is not existed");
+    		throw new RuntimeException("S3 Credentials file (" + PROPERTIES_PATH + ") cannot be found.");
     	}
     	
     	Properties properties = new Properties();
@@ -97,5 +97,14 @@ public class TransferManager {
 		} catch (S3ServiceException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	// Set path to configuration
+	public static void setPropertiesPath(String path){
+		PROPERTIES_PATH = path;
+	}
+	
+	public static String getPropertiesPath(){
+		return PROPERTIES_PATH;
 	}
 }

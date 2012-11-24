@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+
+<!--
+    <servlet>
+      <servlet-name>hello</servlet-name>
+      <description> This is the hello servlet. </description>
+      <servlet-class>hello</servlet-class>
+      <load-on-startup>5</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>hello</servlet-name>
+      <url-pattern>/hello</url-pattern>
+    </servlet-mapping>
+-->
+    <servlet>
+      <servlet-name>MusicMain</servlet-name>
+      <servlet-class>net.acperience.cloudplayer.MusicMain</servlet-class>
+      <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>MusicMain</servlet-name>
+      <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    
+     <servlet>
+      <servlet-name>MusicAuth</servlet-name>
+      <servlet-class>net.acperience.cloudplayer.MusicAuth</servlet-class>
+      <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>MusicAuth</servlet-name>
+      <url-pattern>/auth</url-pattern>
+    </servlet-mapping>   
+    
+    <!-- for static files -->
+    <servlet-mapping>  
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.jpg</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+     <servlet-name>default</servlet-name>
+        <url-pattern>*.png</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.css</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.js</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/favicon.ico</url-pattern>
+    </servlet-mapping>    
+    
+</web-app>
