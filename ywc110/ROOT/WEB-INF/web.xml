@@ -30,7 +30,7 @@
      <servlet>
       <servlet-name>MusicAuth</servlet-name>
       <servlet-class>net.acperience.cloudplayer.MusicAuth</servlet-class>
-      <load-on-startup>1</load-on-startup>
+      <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet-mapping>
@@ -39,10 +39,10 @@
     </servlet-mapping>   
     
     <!-- for static files -->
-    <servlet-mapping>  
+<!--    <servlet-mapping>  
         <servlet-name>default</servlet-name>
         <url-pattern>*.html</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping> -->
 
     <servlet-mapping>
         <servlet-name>default</servlet-name>
