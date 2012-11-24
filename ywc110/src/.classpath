@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="../../lib/json-lib-2.4-jdk15.jar"/>
 	<classpathentry kind="lib" path="../../lib/servlet-api-2.5.jar"/>
 	<classpathentry kind="lib" path="libs/jtpl-2.0.jar"/>
+	<classpathentry kind="lib" path="D:/Code/Git/ICCloudCoursework/lib/httpclient-4.2.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,15 +1,19 @@
 package net.acperience.cloudplayer;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.Principal;
 import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
+import org.jets3t.service.model.S3Bucket;
 
 /**
  * 
@@ -19,6 +23,8 @@ import org.jets3t.service.S3ServiceException;
  * of that HTTP request.
  * 
  * Otherwise, you might get LEAKS on two fronts: the HttpServletRequest object and the MusicKerberos object
+ * 
+ * This also encapsulates the user related operations in this application
  * 
  * @author Lawliet
  *
@@ -32,7 +38,18 @@ public class MusicKerberos extends KerberosAuth {
 
 	private HttpSession session;
 	private HttpServletRequest request;
+	private HttpServletResponse response;	// Debugging purposes
+	private S3Bucket bucket;
+	private S3Service s3Service;
 	
+	/**
+	 * Set S3Service
+	 * @param s3Service the s3Service to set
+	 */
+	public void setS3Service(S3Service s3Service) {
+		this.s3Service = s3Service;
+	}
+
 	public MusicKerberos(String name, String authLoginConfig, String krb5Config, HttpServletRequest request)
 			throws LoginException, SecurityException {
 		// Call super to initialise
@@ -94,29 +111,125 @@ public class MusicKerberos extends KerberosAuth {
 	 * @return The College User ID of the user that has been authenticated. If the user has not been authenticated, returns null
 	 */
 	public String getUserId(){
+		final String attributeName = "UserID";
 		Subject subject = getSubject();
 		if (subject == null)
 			return null;
+		
+		// Check to see if we have stored the User ID already
+		
+		Object cache = session.getAttribute(attributeName);
+		if (cache instanceof String){
+			return (String) cache;
+		}
 		
 		//Get a list of principals
 		Set<Principal> principals = subject.getPrincipals();
 		String userId = null;
 		for (Principal principal : principals){
 			String[] result = principal.getName().split("@");
-			if (result[1] == KERBEROS_REALM){
+			if (result[1].equals(KERBEROS_REALM)){
 				userId = result[0];
 				break;
 			}
 		}
-		
+		session.setAttribute(attributeName, userId);
 		return userId;
+	}
+	
+	/**
+	 * Returns the hash of the User ID or null if user is not logged in
+	 * @return Returns the hash of the User ID or null if user is not logged in
+	 */
+	public String getUserIdHash(){
+		String id = getUserId();
+		if (id == null)
+			return null;
+		return MusicUtility.sha1(id);
+	}
+	
+	/**
+	 * Returns the name of the bucket for the logged in user, or null if not logged in.
+	 * @return Returns the name of the bucket for the logged in user, or null if not logged in.
+	 */
+	public String getUserBucketName(){
+		String id = getUserIdHash();
+		if (id == null)
+			return null;
+		
+		return "ywc110-cloud-" + id;
+	}
+	
+	/**
+	 * Returns the user's bucket. If it does not exist, attempts to create.
+	 * @return
+	 */
+	public S3Bucket getUserBucket() throws S3ServiceException{
+		if (bucket != null)
+			return bucket;
+		String name = getUserBucketName();
+		if (name == null)
+			return null;
+		bucket = s3Service.getOrCreateBucket(name);
+		return bucket;
+	}
+	
+	/**
+	 * Put a boolean value into the session
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	public void putSessionBoolean(String name, boolean value){
+		session.setAttribute(name, value);
+	}
+
+	
+	/**
+	 * Get a Boolean object from session. Returns NULL if it doesn't exist
+	 * @param name
+	 * @return Boolean object stored in session, or NULL if non existent
+	 */
+	
+	public Boolean getSessionBoolean(String name){
+		Object result = session.getAttribute(name);
+		if (result instanceof Boolean)
+			return (Boolean) result;
+		
+		return null;
 	}
 	
 	/**
 	 * Check and sets up user's buckets and necessary files
 	 * 
 	 */
-	public void setupUser(S3Service s3Service) throws S3ServiceException{
+	public void setupUser() throws S3ServiceException{
+		//if (getSessionBoolean("s3Setup") != null)
+		//		return;
+		// Get User Bucket - Create if necessary
+		S3Bucket bucket = getUserBucket();
+		
+	}
+
+	/**
+	 * Sets response object
+	 * @param response
+	 */
+	public void setResponse(HttpServletResponse response) {
+		this.response = response;
+	}
+	/**
+	 * Write a message to output. Debugging purposes
+	 * @param message
+	 */
+	public void writeResponse(String message){
+		try {
+			PrintWriter out = response.getWriter();
+			out.println(message);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 }

@@ -8,16 +8,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-public class MusicAuth extends HttpServlet{
+public class ServletAuth extends HttpServlet{
 	
 	private static final String AUTH_ATTRIBUTE = "CloudMusicAuth";
 	private static final String AUTH_BASE = "/WEB-INF/conf/";
 	private static final String LOGIN_CONF = AUTH_BASE + "jaas.conf";
 	private static final String KRB5_CONF = AUTH_BASE + "krb5.conf";
 	
-	public MusicAuth(){
+	public ServletAuth(){
 		// ...
 	}
 

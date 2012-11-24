@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 
 import net.sourceforge.jtpl.Jtpl;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.jets3t.service.*;
 import org.jets3t.service.impl.rest.httpclient.*;
 import org.jets3t.service.security.AWSCredentials;
@@ -39,12 +40,16 @@ public final class MusicUtility {
 	}
 	
 	// Connect to S3. Returns RestS3Service object
-	public static RestS3Service connect(AWSCredentials credentials) throws S3ServiceException{
-		return new RestS3Service(credentials);
+	public static RestS3Service connect(AWSCredentials credentials, InputStream s3Properties) 
+			throws S3ServiceException, IOException {
+		Jets3tProperties property = new Jets3tProperties();
+		property.loadAndReplaceProperties(s3Properties,null);
+		
+		return new RestS3Service(credentials, null, null, property);
 	}
 	
-	public static RestS3Service connect(InputStream propertyFile) throws IOException, S3ServiceException{
-		return connect(getCredentials(propertyFile));
+	public static RestS3Service connect(InputStream propertyFile, InputStream s3Properties) throws IOException, S3ServiceException{
+		return connect(getCredentials(propertyFile), s3Properties);
 	}
 	
 	// Output page based on template
@@ -52,7 +57,7 @@ public final class MusicUtility {
 	// Convenience function to provide only the body path
 	// In this case, the body block has to be called Body
 	public static String outputPage(HttpServlet context, String title, String body) throws IOException{
-		Jtpl bodyTpl = bodyTpl(context, body);
+		Jtpl bodyTpl = createBodyTpl(context, body);
 		bodyTpl.parse("Body");
 		return outputPage(context, title, bodyTpl);
 	}
@@ -79,7 +84,16 @@ public final class MusicUtility {
 	}
 	
 	// Get Body TPL object
-	public static Jtpl bodyTpl(HttpServlet context, String path) throws IOException{
+	public static Jtpl createBodyTpl(HttpServlet context, String path) throws IOException{
 		return new Jtpl(context.getServletContext().getRealPath(path));
+	}
+	
+	/**
+	 * Return sh1 hash of string
+	 * @param subject The string
+	 * @return
+	 */
+	public static String sha1(String subject){
+		return DigestUtils.shaHex(subject);
 	}
 }

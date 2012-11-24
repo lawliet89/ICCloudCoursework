@@ -18,23 +18,23 @@
     </servlet-mapping>
 -->
     <servlet>
-      <servlet-name>MusicMain</servlet-name>
-      <servlet-class>net.acperience.cloudplayer.MusicMain</servlet-class>
+      <servlet-name>ServletMain</servlet-name>
+      <servlet-class>net.acperience.cloudplayer.ServletMain</servlet-class>
       <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-      <servlet-name>MusicMain</servlet-name>
+      <servlet-name>ServletMain</servlet-name>
       <url-pattern>/</url-pattern>
     </servlet-mapping>
     
      <servlet>
-      <servlet-name>MusicAuth</servlet-name>
-      <servlet-class>net.acperience.cloudplayer.MusicAuth</servlet-class>
+      <servlet-name>ServletAuth</servlet-name>
+      <servlet-class>net.acperience.cloudplayer.ServletAuth</servlet-class>
       <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet-mapping>
-      <servlet-name>MusicAuth</servlet-name>
+      <servlet-name>ServletAuth</servlet-name>
       <url-pattern>/auth</url-pattern>
     </servlet-mapping>   
     
