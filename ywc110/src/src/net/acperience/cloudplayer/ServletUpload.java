@@ -50,6 +50,12 @@ public class ServletUpload extends HttpServlet {
     	response.setContentType("text/html;charset=UTF-8");
     	
 		try {
+			//First up, check that user is logged in
+			MusicKerberos user = MusicKerberos.createMusicKerberos(request, this);
+			if (!user.isAuthenticated()){
+				response.sendRedirect("/auth");
+				return;
+			}
 			JSONObject json = fileManager.handleUpload(request);
 			out.write(json.toString(4));
 			

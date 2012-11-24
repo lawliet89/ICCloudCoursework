@@ -12,7 +12,8 @@ CREATE TABLE Cloud_Item(
     ItemAlbum text NOT NULL,
     ItemYear int NOT NULL,
     Itemkey text NOT NULL
-    CONSTRAINT cloud_item_pkey PRIMARY KEY (ItemId)
+    CONSTRAINT cloud_item_pkey PRIMARY KEY (ItemId),
+    CONSTRAINT cloud_item_userfile UNIQUE(UserId, Itemkey)
 );
 
 CREATE TABLE Cloud_PlaylistItem(

@@ -17,23 +17,27 @@ public class DbManager {
 	private Connection connection;
 	
 	// List of prepared statements for use
-	private PreparedStatement insertItem = null;
-	private static final String insertItemSQL = "INSERT INTO CloudItems VALUES(DEFAULT, ?, ?, ?, ?, ? ,?) RETURNING ItemId;";
-	private PreparedStatement listItem = null;
-	private static final String listItemSQL = "SELECT * FROM CloudItems WHERE UserId = ?;";
-	private PreparedStatement deleteItem = null;
-	private static final String deleteItemSQL = "DELETE FROM CloudItems WHERE ItemId = ?;";
+	private PreparedStatement insertItemStatement = null;
+	private static final String insertItemSQL = "INSERT INTO Cloud_Item VALUES(DEFAULT, ?, ?, ?, ?, ? ,?) RETURNING ItemId;";
+	private PreparedStatement listItemStatement = null;
+	private static final String listItemSQL = "SELECT * FROM Cloud_Item WHERE UserId = ?;";
+	private PreparedStatement deleteItemStatement = null;
+	private static final String deleteItemSQL = "DELETE FROM Cloud_Item WHERE ItemId = ?;";
+	private PreparedStatement getItemByKeyStatement = null;
+	private static final String getItemSQL = "SELECT * FROM Cloud_Item WHERE UserId = ? AND ItemKey = ?;";
 	
 	// Create a connection and populate prepared statements for performance reasons
 	private DbManager(String uri, String user, String pass) throws SQLException{
 		connection = DriverManager.getConnection(uri,user,pass);
-		insertItem = connection.prepareStatement(insertItemSQL);
-		listItem = connection.prepareStatement(listItemSQL);
-		deleteItem = connection.prepareStatement(deleteItemSQL);
+		insertItemStatement = connection.prepareStatement(insertItemSQL);
+		listItemStatement = connection.prepareStatement(listItemSQL);
+		deleteItemStatement = connection.prepareStatement(deleteItemSQL);
+		getItemByKeyStatement = connection.prepareStatement(getItemSQL);
 	}
 	
 	/**
-	 * Insert an item into the table
+	 * Insert an item into the table. 
+	 * If item with the key (i.e. same artist + title + album combination) exists, will return item
 	 * @param userId
 	 * @param itemTitle
 	 * @param itemArtist
@@ -45,15 +49,37 @@ public class DbManager {
 	 */
 	public int insertItem(String userId, String itemTitle, String itemArtist, String itemAlbum, int itemYear, String itemKey) 
 			throws SQLException {
-		insertItem.setString(1, userId);
-		insertItem.setString(2, itemTitle);
-		insertItem.setString(3, itemArtist);
-		insertItem.setString(4, itemAlbum);
-		insertItem.setInt(4, itemYear);
-		insertItem.setString(5, itemKey);
 		
-		ResultSet result = insertItem.executeQuery();
-		return result.getInt(0);
+		// Try to see if the user already has something like this
+		ResultSet result = null;
+		result = getItemByKey(itemKey, userId);
+		
+		if (result.next() == true)
+			return result.getInt(1);
+		
+		insertItemStatement.setString(1, userId);
+		insertItemStatement.setString(2, itemTitle);
+		insertItemStatement.setString(3, itemArtist);
+		insertItemStatement.setString(4, itemAlbum);
+		insertItemStatement.setInt(5, itemYear);
+		insertItemStatement.setString(6, itemKey);
+		
+		result = null;
+		result = insertItemStatement.executeQuery();
+		result.next();
+		return result.getInt(1);
+	}
+	
+	/**
+	 * Gets the results for an item based on the key
+	 * @return
+	 * @throws SQLException
+	 */
+	public ResultSet getItemByKey(String itemKey, String userId) throws SQLException{
+		getItemByKeyStatement.setString(1, userId);
+		getItemByKeyStatement.setString(2, itemKey);
+		
+		return getItemByKeyStatement.executeQuery();
 	}
 	
 	/**
@@ -62,8 +88,8 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public void deleteItem(int itemId) throws SQLException{
-		deleteItem.setInt(1, itemId);
-		deleteItem.executeUpdate();
+		deleteItemStatement.setInt(1, itemId);
+		deleteItemStatement.executeUpdate();
 	}
 	
 	/**

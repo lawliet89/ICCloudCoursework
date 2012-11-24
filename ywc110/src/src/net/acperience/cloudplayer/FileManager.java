@@ -27,7 +27,6 @@ import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
-import org.jaudiotagger.tag.TagField;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.model.S3Object;
@@ -45,8 +44,6 @@ public class FileManager {
 	private HttpServlet context;
 	public static final String CACHE_BASE = "/WEB-INF/cache/";
 	public static final String TEMP_BASE = CACHE_BASE + "temp/";
-	private static final String UPLOAD_FIELD = "uploadFile";
-	
 	private S3Service s3Service = null;
 	
 	public FileManager(HttpServlet context) throws S3ServiceException, IOException{
@@ -81,6 +78,7 @@ public class FileManager {
 	public JSONObject handleUpload(HttpServletRequest request) throws FileUploadException, LoginException, SecurityException, IOException{
 		JSONObject json = new JSONObject();
 		MusicKerberos user = MusicKerberos.createMusicKerberos(request, context);
+		user.setS3Service(s3Service);
 		
 		// See http://www.servletworld.com/servlet-tutorials/servlet-file-upload-example.html
 		DiskFileItemFactory  fileItemFactory = new DiskFileItemFactory ();
@@ -111,65 +109,39 @@ public class FileManager {
 					File file = new File(
 							context.getServletContext().getRealPath(CACHE_BASE)+"/"+user.getUserIdHash() 
 							+ "." + FilenameUtils.getExtension(item.getName()));
-					try {
-						item.write(file);
-					} catch (Exception e) {
-						jsonCurrent.element("sucess", false);
-						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
-						jsonCurrent.element("errorFriendly", "Failed writing file to cache for processing.");
-						continue;
-					}
 					
-					AudioFile meta = null;
-					// Read metadata
-					try {
-						meta = AudioFileIO.read(file);
-					} catch (CannotReadException e) {
-						jsonCurrent.element("sucess", false);
-						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
-						jsonCurrent.element("errorFriendly", "Unable to parse file for meta data");
-						continue;
-					} catch (TagException e) {
-						jsonCurrent.element("sucess", false);
-						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
-						jsonCurrent.element("errorFriendly", "Unable to parse file metadata -- is the file corrupted?");
-						continue;
-					} catch (ReadOnlyFileException e) {
-						jsonCurrent.element("sucess", false);
-						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
-						jsonCurrent.element("errorFriendly", "Cache file permission error.");
-						continue;
-					} catch (InvalidAudioFrameException e) {
-						jsonCurrent.element("sucess", false);
-						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
-						jsonCurrent.element("errorFriendly", "Unable to parse file metadata -- is the file corrupted?");
-						continue;
-					}
-					jsonCurrent.element("format", meta.getAudioHeader().getFormat());
-					jsonCurrent.element("encoding",meta.getAudioHeader().getEncodingType());
-					
-					// See http://www.jthink.net/jaudiotagger/examples_read.jsp
-					Tag tag = meta.getTag();
-					jsonCurrent.element("artist", tag.getFirst(FieldKey.ARTIST));
-					jsonCurrent.element("album", tag.getFirst(FieldKey.ALBUM));
-					jsonCurrent.element("title", tag.getFirst(FieldKey.TITLE));
-					jsonCurrent.element("year", Integer.parseInt(tag.getFirst(FieldKey.YEAR)));
-					jsonCurrent.element("track", tag.getFirst(FieldKey.TRACK));
-					
-					jsonCurrent.element("sucess", true);
-					
-					// Now let's do S3 Processing
-					// Let's build a new key
-					String key = new StringBuilder().append(tag.getFirst(FieldKey.ARTIST))
-							.append("_").append(tag.getFirst(FieldKey.ALBUM))
-							.append("_").append(tag.getFirst(FieldKey.TITLE))
-							.append(".").append(meta.getAudioHeader().getEncodingType())
-							.toString().replaceAll("\\W+", "_");
-					
+					int itemId = 0;
 					DbManager db = null;
-					int itemId;
-					// Now we are going to insert a new entry into the database first
-					try {
+					try{
+						item.write(file);
+						
+						AudioFile meta = null;
+						// Read metadata
+						meta = AudioFileIO.read(file);
+						
+						jsonCurrent.element("format", meta.getAudioHeader().getFormat());
+						jsonCurrent.element("encoding",meta.getAudioHeader().getEncodingType());
+						
+						// See http://www.jthink.net/jaudiotagger/examples_read.jsp
+						Tag tag = meta.getTag();
+						jsonCurrent.element("artist", tag.getFirst(FieldKey.ARTIST));
+						jsonCurrent.element("album", tag.getFirst(FieldKey.ALBUM));
+						jsonCurrent.element("title", tag.getFirst(FieldKey.TITLE));
+						jsonCurrent.element("year", Integer.parseInt(tag.getFirst(FieldKey.YEAR)));
+						jsonCurrent.element("track", tag.getFirst(FieldKey.TRACK));
+						
+						jsonCurrent.element("sucess", true);
+						
+						// Now let's do S3 Processing
+						// Let's build a new key
+						String key = getKey(tag.getFirst(FieldKey.ARTIST), 
+								tag.getFirst(FieldKey.ALBUM), 
+								tag.getFirst(FieldKey.TITLE), 
+								meta.getAudioHeader().getEncodingType());
+						
+
+						// Now we are going to insert a new entry into the database first
+						
 						db = DbManager.getInstance(context);
 						itemId = db.insertItem(user.getUserId(), 
 								tag.getFirst(FieldKey.TITLE), 
@@ -177,47 +149,84 @@ public class FileManager {
 								tag.getFirst(FieldKey.ALBUM), 
 								Integer.parseInt(tag.getFirst(FieldKey.YEAR)), 
 								key);
-						jsonCurrent.element("itemId", itemId);
+						jsonCurrent.element("itemId", itemId);						
 						
-					} catch (SQLException e) {
+						S3Object s3Object = null;
+						s3Object = new S3Object(file);
+						s3Object.setKey(key);
+						
+						// Now let's put the file to S3
+						s3Object = s3Service.putObject(user.getUserBucket(), s3Object);		
+						
+						jsonCurrent.element("key",key);
+						
+					} catch (CannotReadException e) {		// Reading meta data from uploaded file
+						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
+						jsonCurrent.element("errorFriendly", "Unable to parse file for meta data");
+						
+					} catch (TagException e) { // Reading meta data from uploaded file
+						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
+						jsonCurrent.element("errorFriendly", "Unable to parse file metadata -- is the file corrupted?");
+						
+					} catch (ReadOnlyFileException e) { // Reading meta data from uploaded file
+						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
+						jsonCurrent.element("errorFriendly", "Cache file permission error.");
+						
+					} catch (InvalidAudioFrameException e) { // Reading meta data from uploaded file
+						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
+						jsonCurrent.element("errorFriendly", "Unable to parse file metadata -- is the file corrupted?");
+						
+					} catch (SQLException e) {	// Any database operations
 						jsonCurrent.element("sucess", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Error performing database operations.");
 						continue;
-					}
-					
-					
-					S3Object s3Object = null;
-					try {
-						s3Object = new S3Object(file);
 					} catch (NoSuchAlgorithmException e) {
 						// .. Gonna ignore this, for now. Thrown when the JVM doens't support MD5. Unlikely.
-						continue;
-					}
-					s3Object.setKey(key);
-					
-					// Now let's put the file to S3
-					try {
-						s3Object = s3Service.putObject(user.getUserBucket(), s3Object);
 					} catch (S3ServiceException e) {
 						jsonCurrent.element("sucess", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to store file in cloud");
 						
 						try {
-							db.deleteItem(itemId);
+							if (db != null && itemId != 0)
+								db.deleteItem(itemId);
 						} catch (SQLException e1) {
 							// Seriously? so Fucked up?
 							jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e1));
-							continue;
 						} 
-						continue;
+					} catch (Exception e) {		// From writing upload file to cache
+						jsonCurrent.element("sucess", false); 
+						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
+						jsonCurrent.element("errorFriendly", "Failed writing file to cache for processing.");
+					} finally{
+						json.accumulate("files", jsonCurrent);
+						file.delete();
 					}
-					// .. all good.
-					json.accumulate("files", jsonCurrent);
-					file.delete();
 				}
 			}
 		return json;
+	}
+	
+	/**
+	 * Based on inputs, get the key
+	 * @param artist
+	 * @param album
+	 * @param title
+	 * @param extension
+	 * @return
+	 */
+	public static String getKey(String artist, String album, String title, String extension){
+		StringBuilder key = new StringBuilder();
+		key.append(artist).append("_");
+		key.append(album).append("_");
+		key.append(title);
+		
+		return key.toString().replaceAll("\\W+", "_") + "." + extension;
+		
 	}
 }
