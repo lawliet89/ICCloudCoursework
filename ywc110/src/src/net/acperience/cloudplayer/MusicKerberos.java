@@ -140,6 +140,7 @@ public class MusicKerberos extends KerberosAuth {
 				break;
 			}
 		}
+		userId = userId.toLowerCase();
 		session.setAttribute(attributeName, userId);
 		return userId;
 	}

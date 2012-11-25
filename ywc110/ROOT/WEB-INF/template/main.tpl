@@ -6,7 +6,7 @@
 <script src="/javascripts/jquery.form.js" type="text/javascript" language="javascript"></script>
 
 <script type="text/javascript" src="javascripts/jquery.jplayer.min.js"></script>
-<script type="text/javascript" src="javascripts/jplayer.playlist.min.js"></script>
+<script type="text/javascript" src="javascripts/jplayer.playlist.js"></script>
 
 <script type="text/javascript" src="javascripts/main.js"></script>
 
@@ -55,7 +55,7 @@
 						<li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>
 					</ul>
 				</div>
-				<div class="jp-playlist">
+				<div class="jp-playlist" style="max-height:600px; overflow:auto;">
 					<ul>
 						<li></li>
 					</ul>
@@ -74,8 +74,9 @@
     <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
         <div class="five columns omega">
             <h2>Upload Files</h2>
-            <input type="file" name="uploadFile" id="uploadFile" class="multi" />
-            <br /><button type="submit">Upload</button>
+            <div class="uploadDiv">
+                <input type="file" name="uploadFile" id="uploadFile" class="multi" />
+                <br /><button type="submit">Upload</button>
             </div>
         </div>
         <div class="five columns omega" id="uploadProgress" style="text-align: center;">

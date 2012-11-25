@@ -61,6 +61,7 @@ public class FileManager {
 		mp3("mp3"),
 		mp4("m4a"),
 		m4a("m4a"),
+		aac("m4a"),
 		ogg("oga"),
 		oga("oga"),
 		wav("wav");
@@ -149,7 +150,7 @@ public class FileManager {
 						meta = AudioFileIO.read(file);
 						
 						jsonCurrent.element("format", meta.getAudioHeader().getFormat());
-						//TODO Restrict to mp3, oga, m4a, wav
+						//TODO Restrict to mp3, oga, m4a, wav, aac
 						
 						//jsonCurrent.element("encoding",meta.getAudioHeader().getEncodingType());
 						jsonCurrent.element("duration", meta.getAudioHeader().getTrackLength());
@@ -395,6 +396,12 @@ public class FileManager {
 	public static String getJPlayerAttributeName(String key){
 		// Get extension of key
 		String extension = FilenameUtils.getExtension(key).toLowerCase();
-		return JPlayerMapping.valueOf(extension).getExtension();
+		try{
+			return JPlayerMapping.valueOf(extension).getExtension();
+		}
+		catch(IllegalArgumentException e){
+			// Just do a fake MP3 for now
+			return "mp3";
+		}
 	}
 }

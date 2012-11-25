@@ -47,6 +47,9 @@ var PlaylistManager = {
     
     reloadPlaylist: function(){
         this.loadPlaylist(this.currentPlaylist);
+    },
+    
+    deleteItem: function(itemId, playlistId, playlistIndex){
     }
 }
 // wait for the DOM to be loaded 
