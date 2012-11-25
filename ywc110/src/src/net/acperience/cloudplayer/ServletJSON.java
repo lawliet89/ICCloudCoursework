@@ -71,6 +71,8 @@ public class ServletJSON extends HttpServlet {
 			 */
 			if (request.getParameter("list") != null)
 				json = fileManager.getItems(request);
+			else if (request.getParameter("item") != null)
+				json = fileManager.getItem(request, response);
 			
 		} catch (LoginException e) {
 			json.element("exception", ExceptionUtils.getStackTrace(e));

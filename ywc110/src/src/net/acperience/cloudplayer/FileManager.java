@@ -11,7 +11,9 @@ import java.util.List;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.fileupload.FileItem;
@@ -80,7 +82,7 @@ public class FileManager {
 	 * @throws IOException 
 	 */
 	public JSONObject handleUpload(HttpServletRequest request) throws FileUploadException, LoginException, SecurityException, IOException{
-		JSONObject json = new JSONObject();
+		JSONArray json = new JSONArray();
 		MusicKerberos user = MusicKerberos.createMusicKerberos(request, context);
 		user.setS3Service(s3Service);
 		
@@ -135,7 +137,7 @@ public class FileManager {
 						//jsonCurrent.element("year", Integer.parseInt(tag.getFirst(FieldKey.YEAR)));
 						//jsonCurrent.element("track", tag.getFirst(FieldKey.TRACK));
 						
-						jsonCurrent.element("sucess", true);
+						jsonCurrent.element("success", true);
 						
 						// Now let's do S3 Processing
 						// Let's build a new key
@@ -176,36 +178,37 @@ public class FileManager {
 						s3Service.putObjectAcl(user.getUserBucket(), s3Object);
 						
 						jsonCurrent.element("key",key);
+						jsonCurrent.element("success", true);
 						
 					} catch (CannotReadException e) {		// Reading meta data from uploaded file
-						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to parse file for meta data");
 						
 					} catch (TagException e) { // Reading meta data from uploaded file
-						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to parse file metadata -- is the file corrupted?");
 						
 					} catch (ReadOnlyFileException e) { // Reading meta data from uploaded file
-						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Cache file permission error.");
 						
 					} catch (InvalidAudioFrameException e) { // Reading meta data from uploaded file
-						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to parse file metadata -- is the file corrupted?");
 						
 					} catch (SQLException e) {	// Any database operations
-						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Error performing database operations.");
 						continue;
 					} catch (NoSuchAlgorithmException e) {
 						// .. Gonna ignore this, for now. Thrown when the JVM doens't support MD5. Unlikely.
 					} catch (S3ServiceException e) {
-						jsonCurrent.element("sucess", false);
+						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to store file in cloud");
 						
@@ -217,16 +220,17 @@ public class FileManager {
 							jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e1));
 						} 
 					} catch (Exception e) {		// From writing upload file to cache
-						jsonCurrent.element("sucess", false); 
+						jsonCurrent.element("success", false); 
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Failed writing file to cache for processing.");
 					} finally{
-						json.accumulate("files", jsonCurrent);
+						json.add(jsonCurrent);
 						file.delete();
 					}
 				}
 			}
-		return json;
+			
+		return new JSONObject().element("files", json);
 	}
 	
 	/**
@@ -244,7 +248,7 @@ public class FileManager {
 		DbManager db = DbManager.getInstance(context);
 		
 		ResultSet results = db.getItems(user.getUserId());
-		
+		JSONArray jsonArray = new JSONArray();
 		while(results.next()){
 			JSONObject jsonCurrent = new JSONObject();
 			try {
@@ -255,14 +259,57 @@ public class FileManager {
 				jsonCurrent.element("key", results.getString("itemkey"));
 				jsonCurrent.element("year",results.getInt("itemyear"));
 				jsonCurrent.element("duration", results.getInt("itemDuration"));
+				jsonArray.add(jsonCurrent);
 			} catch (SQLException e) {
 				json.element("exception", ExceptionUtils.getStackTrace(e));
 			}
-			finally{
-				json.accumulate("items", jsonCurrent);
+		}
+		json.element("items", jsonArray);
+		return json;
+	}
+	
+	/**
+	 * Based on HTTP Request, return details for one item
+	 * @param request
+	 * @param response 
+	 * @return JSONObject populated with details, or an empty object if illegal or no request made
+	 * @throws SecurityException 
+	 * @throws LoginException 
+	 * @throws SQLException 
+	 * @throws IOException 
+	 */
+	public JSONObject getItem(HttpServletRequest request, HttpServletResponse response) 
+			throws LoginException, SecurityException, IOException, SQLException{
+		JSONObject json = new JSONObject();
+		MusicKerberos user = MusicKerberos.createMusicKerberos(request, context);
+		DbManager db = DbManager.getInstance(context);
+		
+		ResultSet results = null;
+		if (request.getParameter("key") != null)
+			results = db.getItemByKey(request.getParameter("key"), user.getUserId());
+		else if (request.getParameter("id") != null){
+			try{
+				results = db.getItemById(Integer.parseInt(request.getParameter("id")), user.getUserId());
+			} catch (NumberFormatException e){
+				// Illegal format. Ignored
 			}
 		}
-		
+		if (results != null && results.next()){
+			String url = getUrl(results.getString("itemkey"), user.getUserBucketName());
+			json.element("id", results.getInt("itemid"));
+			json.element("title", results.getString("itemtitle"));
+			json.element("artist", results.getString("itemartist"));
+			json.element("album", results.getString("itemalbum"));
+			json.element("key", results.getString("itemkey"));
+			json.element("year",results.getInt("itemyear"));
+			json.element("duration", results.getInt("itemDuration"));
+			json.element("url", url);
+			
+			if (request.getParameter("redirect") != null)
+				response.sendRedirect(url);
+		}
+		if (json.isEmpty())
+			json.element("error", "Incorrect request parameter, unauthorised access, or item was not found.");
 		return json;
 	}
 	
@@ -282,5 +329,30 @@ public class FileManager {
 		
 		return key.toString().replaceAll("\\W+", "_") + "." + extension;
 		
+	}
+	
+	/**
+	 * Return the URL to the item based on key and bucket
+	 * @param key
+	 * @param bucket
+	 * @return
+	 */
+	public static String getUrl(String key, String bucket){
+		return new StringBuilder().append("http://")
+				.append(bucket).append(".s3.bigdatapro.org/")
+				.append(key).toString();
+	}
+	
+	/**
+	 * Convenience method to get URL
+	 * @param artist
+	 * @param album
+	 * @param title
+	 * @param extension
+	 * @param bucket
+	 * @return
+	 */
+	public static String getUrl(String artist, String album, String title, String extension, String bucket){
+		return getUrl(getKey(artist, album, title, extension), bucket);
 	}
 }

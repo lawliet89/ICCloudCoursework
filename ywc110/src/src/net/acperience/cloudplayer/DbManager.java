@@ -25,6 +25,8 @@ public class DbManager {
 	private static final String deleteItemSQL = "DELETE FROM Cloud_Item WHERE ItemId = ?;";
 	private PreparedStatement getItemByKeyStatement = null;
 	private static final String getItemSQL = "SELECT * FROM Cloud_Item WHERE UserId = ? AND ItemKey = ?;";
+	private PreparedStatement getItemByIdStatement = null;
+	private static final String getItemByIdSQ = "SELECT * FROM Cloud_Item WHERE UserId = ? AND ItemId = ?;";
 	
 	// Create a connection and populate prepared statements for performance reasons
 	private DbManager(String uri, String user, String pass) throws SQLException{
@@ -33,6 +35,7 @@ public class DbManager {
 		listItemStatement = connection.prepareStatement(listItemSQL);
 		deleteItemStatement = connection.prepareStatement(deleteItemSQL);
 		getItemByKeyStatement = connection.prepareStatement(getItemSQL);
+		getItemByIdStatement = connection.prepareStatement(getItemByIdSQ);
 	}
 	
 	/**
@@ -81,6 +84,19 @@ public class DbManager {
 		getItemByKeyStatement.setString(2, itemKey);
 		
 		return getItemByKeyStatement.executeQuery();
+	}
+	
+	/**
+	 * Returns item details via ID
+	 * @param Id
+	 * @param userId
+	 * @return
+	 * @throws SQLException
+	 */
+	public ResultSet getItemById(int Id, String userId) throws SQLException{
+		getItemByIdStatement.setInt(2, Id);
+		getItemByIdStatement.setString(1, userId);
+		return getItemByIdStatement.executeQuery();
 	}
 	
 	/**

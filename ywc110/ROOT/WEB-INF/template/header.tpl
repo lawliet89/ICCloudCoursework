@@ -22,6 +22,7 @@
 	<link rel="stylesheet" href="/stylesheets/base.css">
 	<link rel="stylesheet" href="/stylesheets/skeleton.css">
 	<link rel="stylesheet" href="/stylesheets/layout.css">
+    <link rel="stylesheet" href="/stylesheets/jquery.toastmessage.css">
 
 	<!--[if lt IE 9]>
 		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -34,8 +35,11 @@
 	<link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png">
 	<link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png">
 
-
-    
+    <!-- JavaScript
+	================================================== -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+    <script>window.jQuery || document.write('<script src="/javascripts/jquery-1.8.3.min.js"><\/script>')</script>
+    <script src="/javascripts/jquery.toastmessage.js" type="text/javascript"></script>
 </head>
 <body>
 
