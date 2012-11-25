@@ -15,7 +15,7 @@ public class ServletMain extends HttpServlet {
 	public static final String TAG = "ServletMain";
 	
 	private S3Service s3Service;
-	private FileManager fileManager;
+//	private FileManager fileManager;
 	
 	public ServletMain(){
 		// ...
@@ -29,7 +29,7 @@ public class ServletMain extends HttpServlet {
 			s3Service = MusicUtility.connect(getServletContext().getResourceAsStream(MusicUtility.CREDENTIALS_PATH),
 					getServletContext().getResourceAsStream(MusicUtility.JETS3_PATH));	
 			
-			fileManager = new FileManager(this);
+//			fileManager = new FileManager(this);
 		}
 		catch (IOException e){
 			e.printStackTrace();

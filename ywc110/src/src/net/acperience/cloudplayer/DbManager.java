@@ -18,7 +18,7 @@ public class DbManager {
 	
 	// List of prepared statements for use
 	private PreparedStatement insertItemStatement = null;
-	private static final String insertItemSQL = "INSERT INTO Cloud_Item VALUES(DEFAULT, ?, ?, ?, ?, ? ,?) RETURNING ItemId;";
+	private static final String insertItemSQL = "INSERT INTO Cloud_Item VALUES(DEFAULT, ?, ?, ?, ?, ? ,?, ?) RETURNING ItemId;";
 	private PreparedStatement listItemStatement = null;
 	private static final String listItemSQL = "SELECT * FROM Cloud_Item WHERE UserId = ?;";
 	private PreparedStatement deleteItemStatement = null;
@@ -47,7 +47,7 @@ public class DbManager {
 	 * @return The ItemId of the new row created
 	 * @throws SQLException 
 	 */
-	public int insertItem(String userId, String itemTitle, String itemArtist, String itemAlbum, int itemYear, String itemKey) 
+	public int insertItem(String userId, String itemTitle, String itemArtist, String itemAlbum, int itemYear, String itemKey, int itemDuration) 
 			throws SQLException {
 		
 		// Try to see if the user already has something like this
@@ -63,6 +63,7 @@ public class DbManager {
 		insertItemStatement.setString(4, itemAlbum);
 		insertItemStatement.setInt(5, itemYear);
 		insertItemStatement.setString(6, itemKey);
+		insertItemStatement.setInt(7, itemDuration);
 		
 		result = null;
 		result = insertItemStatement.executeQuery();

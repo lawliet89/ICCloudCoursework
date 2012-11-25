@@ -33,7 +33,6 @@ import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.acl.AccessControlList;
 import org.jets3t.service.acl.GroupGrantee;
 import org.jets3t.service.acl.Permission;
-import org.jets3t.service.acl.gs.AllUsersGrantee;
 import org.jets3t.service.model.S3Object;
 
 /**
@@ -126,6 +125,7 @@ public class FileManager {
 						
 						jsonCurrent.element("format", meta.getAudioHeader().getFormat());
 						//jsonCurrent.element("encoding",meta.getAudioHeader().getEncodingType());
+						jsonCurrent.element("duration", meta.getAudioHeader().getTrackLength());
 						
 						// See http://www.jthink.net/jaudiotagger/examples_read.jsp
 						Tag tag = meta.getTag();
@@ -158,7 +158,8 @@ public class FileManager {
 								tag.getFirst(FieldKey.TITLE), 
 								tag.getFirst(FieldKey.ARTIST),
 								tag.getFirst(FieldKey.ALBUM), 
-								year, key);
+								year, key,
+								meta.getAudioHeader().getTrackLength());
 						jsonCurrent.element("itemId", itemId);						
 						
 						S3Object s3Object = null;
@@ -253,6 +254,7 @@ public class FileManager {
 				jsonCurrent.element("album", results.getString("itemalbum"));
 				jsonCurrent.element("key", results.getString("itemkey"));
 				jsonCurrent.element("year",results.getInt("itemyear"));
+				jsonCurrent.element("duration", results.getInt("itemDuration"));
 			} catch (SQLException e) {
 				json.element("exception", ExceptionUtils.getStackTrace(e));
 			}
