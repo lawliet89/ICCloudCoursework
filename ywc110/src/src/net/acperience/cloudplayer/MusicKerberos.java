@@ -234,7 +234,6 @@ public class MusicKerberos extends KerberosAuth {
 			PrintWriter out = response.getWriter();
 			out.println(message);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

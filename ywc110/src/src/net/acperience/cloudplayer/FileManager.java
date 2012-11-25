@@ -52,6 +52,29 @@ public class FileManager {
 	public static final String TEMP_BASE = CACHE_BASE + "temp/";
 	private S3Service s3Service = null;
 	
+	/**
+	 * Enumeration to map file extensions to JPlayer Attribute Names
+	 * @author Lawliet
+	 *
+	 */
+	public static enum JPlayerMapping{
+		mp3("mp3"),
+		mp4("m4a"),
+		m4a("m4a"),
+		ogg("oga"),
+		oga("oga"),
+		wav("wav");
+		
+		private final String extension;
+		JPlayerMapping(String extension){
+			this.extension = extension;
+		}
+		
+		String getExtension(){
+			return this.extension;
+		}
+	}
+	
 	public FileManager(HttpServlet context) throws S3ServiceException, IOException{
 		// .. Private constructor. Use getInstance() to get the object
 		this.context = context;
@@ -126,6 +149,8 @@ public class FileManager {
 						meta = AudioFileIO.read(file);
 						
 						jsonCurrent.element("format", meta.getAudioHeader().getFormat());
+						//TODO Restrict to mp3, oga, m4a, wav
+						
 						//jsonCurrent.element("encoding",meta.getAudioHeader().getEncodingType());
 						jsonCurrent.element("duration", meta.getAudioHeader().getTrackLength());
 						
@@ -252,6 +277,7 @@ public class FileManager {
 		while(results.next()){
 			JSONObject jsonCurrent = new JSONObject();
 			try {
+				String url = getUrl(results.getString("itemkey"), user.getUserBucketName());
 				jsonCurrent.element("id", results.getInt("itemid"));
 				jsonCurrent.element("title", results.getString("itemtitle"));
 				jsonCurrent.element("artist", results.getString("itemartist"));
@@ -259,12 +285,15 @@ public class FileManager {
 				jsonCurrent.element("key", results.getString("itemkey"));
 				jsonCurrent.element("year",results.getInt("itemyear"));
 				jsonCurrent.element("duration", results.getInt("itemDuration"));
+				jsonCurrent.element("url", url);
+				jsonCurrent.element(getJPlayerAttributeName(url), url);
 				jsonArray.add(jsonCurrent);
 			} catch (SQLException e) {
 				json.element("exception", ExceptionUtils.getStackTrace(e));
 			}
 		}
 		json.element("items", jsonArray);
+		json.element("playlistId", 0);
 		return json;
 	}
 	
@@ -304,7 +333,7 @@ public class FileManager {
 			json.element("year",results.getInt("itemyear"));
 			json.element("duration", results.getInt("itemDuration"));
 			json.element("url", url);
-			
+			json.element(getJPlayerAttributeName(url), url);
 			if (request.getParameter("redirect") != null)
 				response.sendRedirect(url);
 		}
@@ -354,5 +383,16 @@ public class FileManager {
 	 */
 	public static String getUrl(String artist, String album, String title, String extension, String bucket){
 		return getUrl(getKey(artist, album, title, extension), bucket);
+	}
+	
+	/**
+	 * Based on key, generate the name of the JPlayer attribute for use with JPlayer
+	 * @param key
+	 * @return
+	 */
+	public static String getJPlayerAttributeName(String key){
+		// Get extension of key
+		String extension = FilenameUtils.getExtension(key).toLowerCase();
+		return JPlayerMapping.valueOf(extension).getExtension();
 	}
 }

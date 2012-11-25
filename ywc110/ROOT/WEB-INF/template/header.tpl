@@ -23,6 +23,12 @@
 	<link rel="stylesheet" href="/stylesheets/skeleton.css">
 	<link rel="stylesheet" href="/stylesheets/layout.css">
     <link rel="stylesheet" href="/stylesheets/jquery.toastmessage.css">
+    
+    <style type="text/css">
+        .hidden{
+            display: none;
+        }
+    </style>
 
 	<!--[if lt IE 9]>
 		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
