@@ -20,7 +20,7 @@ public class DbManager {
 	private PreparedStatement insertItemStatement = null;
 	private static final String insertItemSQL = "INSERT INTO Cloud_Item VALUES(DEFAULT, ?, ?, ?, ?, ? ,?, ?) RETURNING ItemId;";
 	private PreparedStatement listItemStatement = null;
-	private static final String listItemSQL = "SELECT * FROM Cloud_Item WHERE UserId = ?;";
+	private static final String listItemSQL = "SELECT * FROM Cloud_Item WHERE UserId = ? ORDER BY itemartist, itemalbum,  itemtitle;";
 	private PreparedStatement deleteItemStatement = null;
 	private static final String deleteItemSQL = "DELETE FROM Cloud_Item WHERE ItemId = ?;";
 	private PreparedStatement getItemByKeyStatement = null;

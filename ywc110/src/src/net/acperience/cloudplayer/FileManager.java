@@ -286,7 +286,9 @@ public class FileManager {
 				jsonCurrent.element("year",results.getInt("itemyear"));
 				jsonCurrent.element("duration", results.getInt("itemDuration"));
 				jsonCurrent.element("url", url);
+				//JPlayer specific
 				jsonCurrent.element(getJPlayerAttributeName(url), url);
+				jsonCurrent.element("free", true);		// Allow access to the URL
 				jsonArray.add(jsonCurrent);
 			} catch (SQLException e) {
 				json.element("exception", ExceptionUtils.getStackTrace(e));
