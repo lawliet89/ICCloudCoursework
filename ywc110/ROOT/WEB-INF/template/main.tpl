@@ -18,7 +18,7 @@
     </div>
     <!-- Player -->
     <div class="nine columns alpha">
-        <h2>Now Playing <img class="hidden" id="playlistLoading" src="/images/progress.gif" alt="" /></h2>
+        <h2 id="playlistNameDisplay">Now Playing <img class="hidden" id="playlistLoading" src="/images/progress.gif" alt="" /></h2>
         <a href="" onclick="PlaylistManager.reloadPlaylist(); return false;">[Reload Playlist]</a>
     </div>
     <div class="nine columns alpha">
@@ -74,14 +74,11 @@
     <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
         <div class="five columns omega">
             <h2>Upload Files</h2>
-            <div class="six columns alpha uploadDiv">
-                <input type="file" name="uploadFile" id="uploadFile" class="multi" />
-            </div>
-            <div class="four columns omega uploadDiv">
-                <button type="submit">Upload</button>
+            <input type="file" name="uploadFile" id="uploadFile" class="multi" />
+            <br /><button type="submit">Upload</button>
             </div>
         </div>
-        <div class="ten columns" id="uploadProgress" style="text-align: center;">
+        <div class="five columns omega" id="uploadProgress" style="text-align: center;">
             <img src="/images/progress.gif" alt="" /> Uploading files...
         </div>
     </form>

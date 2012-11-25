@@ -36,6 +36,12 @@ var PlaylistManager = {
             $("#playlistLoading").fadeOut("fast");
             PlaylistManager.playlist.setPlaylist(data.items);
             PlaylistManager.currentPlaylist = data.playlistId;
+            if (data.playlistId == 0){
+                $("#playlistNameDisplay").html("All Items");
+            }
+            else{
+                $("#playlistNameDisplay").html(playlistName);
+            }
         });
     },
     
