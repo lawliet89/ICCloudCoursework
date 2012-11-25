@@ -3,6 +3,7 @@ package net.acperience.cloudplayer;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,10 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
+import org.jets3t.service.acl.AccessControlList;
+import org.jets3t.service.acl.GroupGrantee;
+import org.jets3t.service.acl.Permission;
+import org.jets3t.service.acl.gs.AllUsersGrantee;
 import org.jets3t.service.model.S3Object;
 
 /**
@@ -120,15 +125,15 @@ public class FileManager {
 						meta = AudioFileIO.read(file);
 						
 						jsonCurrent.element("format", meta.getAudioHeader().getFormat());
-						jsonCurrent.element("encoding",meta.getAudioHeader().getEncodingType());
+						//jsonCurrent.element("encoding",meta.getAudioHeader().getEncodingType());
 						
 						// See http://www.jthink.net/jaudiotagger/examples_read.jsp
 						Tag tag = meta.getTag();
 						jsonCurrent.element("artist", tag.getFirst(FieldKey.ARTIST));
 						jsonCurrent.element("album", tag.getFirst(FieldKey.ALBUM));
 						jsonCurrent.element("title", tag.getFirst(FieldKey.TITLE));
-						jsonCurrent.element("year", Integer.parseInt(tag.getFirst(FieldKey.YEAR)));
-						jsonCurrent.element("track", tag.getFirst(FieldKey.TRACK));
+						//jsonCurrent.element("year", Integer.parseInt(tag.getFirst(FieldKey.YEAR)));
+						//jsonCurrent.element("track", tag.getFirst(FieldKey.TRACK));
 						
 						jsonCurrent.element("sucess", true);
 						
@@ -143,12 +148,17 @@ public class FileManager {
 						// Now we are going to insert a new entry into the database first
 						
 						db = DbManager.getInstance(context);
+						int year;
+						try{
+							year = Integer.parseInt(tag.getFirst(FieldKey.YEAR));
+						} catch (NumberFormatException e){
+							year = 0;
+						}
 						itemId = db.insertItem(user.getUserId(), 
 								tag.getFirst(FieldKey.TITLE), 
 								tag.getFirst(FieldKey.ARTIST),
 								tag.getFirst(FieldKey.ALBUM), 
-								Integer.parseInt(tag.getFirst(FieldKey.YEAR)), 
-								key);
+								year, key);
 						jsonCurrent.element("itemId", itemId);						
 						
 						S3Object s3Object = null;
@@ -157,6 +167,12 @@ public class FileManager {
 						
 						// Now let's put the file to S3
 						s3Object = s3Service.putObject(user.getUserBucket(), s3Object);		
+						
+						// Now let's give it public access
+						AccessControlList acl = s3Service.getObjectAcl(user.getUserBucket(), key);
+						acl.grantPermission(GroupGrantee.ALL_USERS, Permission.PERMISSION_READ);
+						s3Object.setAcl(acl);
+						s3Service.putObjectAcl(user.getUserBucket(), s3Object);
 						
 						jsonCurrent.element("key",key);
 						
@@ -209,6 +225,42 @@ public class FileManager {
 					}
 				}
 			}
+		return json;
+	}
+	
+	/**
+	 * Returns a JSONObject containing a list of files belonging to a user 
+	 * @param request
+	 * @return
+	 * @throws LoginException
+	 * @throws SecurityException
+	 * @throws SQLException 
+	 * @throws IOException 
+	 */
+	public JSONObject getItems(HttpServletRequest request) throws LoginException, SecurityException, IOException, SQLException{
+		JSONObject json = new JSONObject();
+		MusicKerberos user = MusicKerberos.createMusicKerberos(request, context);
+		DbManager db = DbManager.getInstance(context);
+		
+		ResultSet results = db.getItems(user.getUserId());
+		
+		while(results.next()){
+			JSONObject jsonCurrent = new JSONObject();
+			try {
+				jsonCurrent.element("id", results.getInt("itemid"));
+				jsonCurrent.element("title", results.getString("itemtitle"));
+				jsonCurrent.element("artist", results.getString("itemartist"));
+				jsonCurrent.element("album", results.getString("itemalbum"));
+				jsonCurrent.element("key", results.getString("itemkey"));
+				jsonCurrent.element("year",results.getInt("itemyear"));
+			} catch (SQLException e) {
+				json.element("exception", ExceptionUtils.getStackTrace(e));
+			}
+			finally{
+				json.accumulate("items", jsonCurrent);
+			}
+		}
+		
 		return json;
 	}
 	

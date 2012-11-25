@@ -48,7 +48,18 @@
       <servlet-name>ServletUpload</servlet-name>
       <url-pattern>/upload</url-pattern>
     </servlet-mapping>       
-    
+ 
+     <servlet>
+      <servlet-name>ServletJSON</servlet-name>
+      <servlet-class>net.acperience.cloudplayer.ServletJSON</servlet-class>
+      <load-on-startup>4</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>ServletJSON</servlet-name>
+      <url-pattern>/json</url-pattern>
+    </servlet-mapping>    
+ 
     <!-- for static files -->
 <!--    <servlet-mapping>  
         <servlet-name>default</servlet-name>

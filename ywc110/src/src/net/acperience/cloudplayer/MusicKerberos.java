@@ -214,7 +214,7 @@ public class MusicKerberos extends KerberosAuth {
 		//if (getSessionBoolean("s3Setup") != null)
 		//		return;
 		// Get User Bucket - Create if necessary
-		S3Bucket bucket = getUserBucket();
+		// S3Bucket bucket = getUserBucket();
 		
 	}
 

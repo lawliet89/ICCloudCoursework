@@ -83,6 +83,17 @@ public class DbManager {
 	}
 	
 	/**
+	 * Returns a list of items belonging to user
+	 * @param userId
+	 * @return
+	 * @throws SQLException
+	 */
+	public ResultSet getItems(String userId) throws SQLException{
+		listItemStatement.setString(1, userId);
+		return listItemStatement.executeQuery();
+	}
+	
+	/**
 	 * Delete an item
 	 * @param itemId
 	 * @throws SQLException
