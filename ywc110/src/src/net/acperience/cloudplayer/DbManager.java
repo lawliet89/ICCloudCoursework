@@ -17,6 +17,7 @@ public class DbManager {
 	private Connection connection;
 	
 	// List of prepared statements for use
+	// Items management
 	private PreparedStatement insertItemStatement = null;
 	private static final String insertItemSQL = "INSERT INTO Cloud_Item VALUES(DEFAULT, ?, ?, ?, ?, ? ,?, ?) RETURNING ItemId;";
 	private PreparedStatement listItemStatement = null;
@@ -30,6 +31,14 @@ public class DbManager {
 	private PreparedStatement deleteItemByKeyStatement = null;
 	private static final String deleteItemByKeySQL = "DELETE FROM Cloud_Item WHERE UserId = ? AND ItemKey = ?;";
 	
+	// Playlist Management
+	private PreparedStatement insertPlaylistStatement = null;
+	private static final String insertPlaylistSQL = "INSERT INTO Cloud_Playlist VALUES(DEFAULT, ?, ?) RETURNING PlaylistId;";
+	private PreparedStatement getPlaylistByNameStatement = null;
+	private static final String getPlaylistByNameSQL = "SELECT * FROM Cloud_Playlist WHERE UserId = ? AND PlaylistName = ? ;";
+	private PreparedStatement getPlaylistByIdStatement = null;
+	private static final String getPlaylistByIdSQL = "SELECT * FROM Cloud_Playlist WHERE UserId = ? AND PlaylistId = ?;";
+	
 	// Create a connection and populate prepared statements for performance reasons
 	private DbManager(String uri, String user, String pass) throws SQLException{
 		connection = DriverManager.getConnection(uri,user,pass);
@@ -40,6 +49,11 @@ public class DbManager {
 		getItemByIdStatement = connection.prepareStatement(getItemByIdSQ);
 		deleteItemByIdStatement = connection.prepareStatement(deleteItemByIdSQL);
 		deleteItemByKeyStatement = connection.prepareStatement(deleteItemByKeySQL);
+		
+		// Playlist Management
+		insertPlaylistStatement = connection.prepareStatement(insertPlaylistSQL);
+		getPlaylistByIdStatement = connection.prepareStatement(getPlaylistByIdSQL);
+		getPlaylistByNameStatement = connection.prepareStatement(getPlaylistByNameSQL);
 	}
 	
 	/**
@@ -135,6 +149,49 @@ public class DbManager {
 		deleteItemByKeyStatement.setString(1, user.getUserId());
 		deleteItemByKeyStatement.setString(2, itemKey);
 		deleteItemByKeyStatement.executeUpdate();
+	}
+	
+	/**
+	 * Insert a new playlist. Returns the ID of the inserted playlist
+	 * @param userId
+	 * @param playlistName
+	 * @return ID of the newly inserted playlist
+	 * @throws SQLException
+	 */
+	public int insertPlaylist(String userId, String playlistName) throws SQLException{
+		// Try to see if the user already has something like this
+		ResultSet result = null;
+		result = getPlaylistByName(userId, playlistName);
+		
+		if (result.next() == true)
+			return result.getInt(1);
+		
+		insertPlaylistStatement.setString(1, playlistName);
+		insertPlaylistStatement.setString(2, userId);
+		
+		result = null;
+		result = insertPlaylistStatement.executeQuery();
+		result.next();
+		return result.getInt(1);
+	}
+	
+	/**
+	 * Get Playlist by ID
+	 * @param userID
+	 * @param playlistId
+	 * @return
+	 * @throws SQLException
+	 */
+	public ResultSet getPlaylistById(String userID, int playlistId) throws SQLException{
+		getPlaylistByIdStatement.setString(1, userID);
+		getPlaylistByIdStatement.setInt(2, playlistId);
+		return getPlaylistByIdStatement.executeQuery();
+	}
+	
+	public ResultSet getPlaylistByName(String userID, String playlistName) throws SQLException{
+		getPlaylistByNameStatement.setString(1, userID);
+		getPlaylistByNameStatement.setString(2, playlistName);
+		return getPlaylistByNameStatement.executeQuery();
 	}
 	
 	/**

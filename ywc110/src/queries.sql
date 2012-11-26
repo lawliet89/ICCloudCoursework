@@ -1,7 +1,8 @@
 CREATE TABLE Cloud_Playlist(
     PlaylistId SERIAL NOT NULL PRIMARY KEY,
     PlaylistName text NOT NULL,
-    UserId text NOT NULL
+    UserId text NOT NULL,
+    CONSTRAINT cloud_playlist_user UNIQUE(PlaylistName, UserId)
 );
 
 CREATE TABLE Cloud_Item(

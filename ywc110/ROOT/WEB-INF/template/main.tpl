@@ -10,6 +10,13 @@
 
 <script type="text/javascript" src="javascripts/main.js"></script>
 
+<style type="text/css">
+    #playlistUl {
+        width: 100%;
+        background-color: #ccc;
+        border-top: 1px solid #009be3;
+    }
+</style>
 
 <div class="sixteen columns">
     <div class="sixteen columns">
@@ -68,6 +75,21 @@
 		</div>
 
     
+    </div>
+    
+    <!-- Playlists -->
+    <div class="five columns omega">
+        <h2>Playlists</h2>
+        
+        <ul id="playlistUl">
+            <li id="playlistAllItems">All Items</li>
+            <li>Playlist</li>
+            <li>Playlist</li>
+            <li>Playlist</li>
+            <li>Playlist</li>
+            <li>Playlist</li>
+        </ul>
+        
     </div>
     
     <!-- Upload -->

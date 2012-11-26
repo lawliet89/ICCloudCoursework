@@ -2,9 +2,12 @@ package net.acperience.cloudplayer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import net.sourceforge.jtpl.Jtpl;
 
@@ -97,5 +100,41 @@ public final class MusicUtility {
 	 */
 	public static String sha1(String subject){
 		return DigestUtils.shaHex(subject);
+	}
+	
+	/**
+	 * Generate a new nonce hash and store it in the user's session
+	 * @param request
+	 * @param user
+	 * @return the Nonce generated
+	 */
+	public static String generateNonce(HttpServletRequest request, MusicKerberos user){
+		HttpSession session = request.getSession();
+		StringBuilder str = new StringBuilder(user.getUserIdHash());
+		str.append(new Date().getTime());
+		String nonce = sha1(str.toString());
+		
+		session.setAttribute("nonce", nonce);
+		
+		return nonce;
+	}
+	
+	/**
+	 * Consume the nonce and return whether it was valid or not.
+	 * @param request
+	 * @return Whether the nonce was valid or not
+	 */
+	
+	public static boolean consumeNonce(HttpServletRequest request, String nonce){
+		HttpSession session = request.getSession();
+		String stored = (String) session.getAttribute("nonce");
+		if (stored == null)
+			return false;
+		
+		if (!stored.equals(nonce))
+			return false;
+		
+		session.removeAttribute("nonce");
+		return true;
 	}
 }

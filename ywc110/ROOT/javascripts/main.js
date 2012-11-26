@@ -55,7 +55,8 @@ var PlaylistManager = {
                 return;
             // Delete Item
             $("#playlistLoading").fadeIn("fast");
-            $.getJSON("/json?remove&itemId=" + itemId, function(data){
+            $.getJSON("/json?remove&itemId=" + itemId + "&nonce=" + NonceManager.nonce, function(data){
+                NonceManager.getNewNonce();
                 $("#playlistLoading").fadeOut("fast");
                 if (data.success){
                     $().toastmessage('showSuccessToast', "File deleted");
@@ -69,6 +70,16 @@ var PlaylistManager = {
         }
     }
 }
+
+var NonceManager = {
+    nonce: null,
+    getNewNonce: function(){
+        $.getJSON("/json?nonce", function(data){
+            NonceManager.nonce = data.nonce;
+        });
+    }
+};
+
 // wait for the DOM to be loaded 
 $(document).ready(function() { 
     $("#uploadProgress").hide();
@@ -112,6 +123,9 @@ $(document).ready(function() {
     
     // Load all items
     PlaylistManager.initialisePlaylist();
+    
+    // Initialise a nonce
+    NonceManager.getNewNonce();
 }); 
 
 

@@ -95,22 +95,33 @@ public class ServletJSON extends HttpServlet {
 			
 			// Remove an item from the system or from a playlist
 			else if (request.getParameter("remove") != null){
-				
-				if (request.getParameter("playlistId") == null){
-					// Delete item
-					
-					// /json?remove&itemId=?
-					if (request.getParameter("itemId") != null){
-						json = fileManager.deleteItemById(Integer.parseInt(request.getParameter("itemId")), user);
+				// We consume nonce first
+				if (request.getParameter("nonce") != null && MusicUtility.consumeNonce(request, request.getParameter("nonce"))){
+					if (request.getParameter("playlistId") == null){
+						// Delete item
+						
+						// /json?remove&itemId=?
+						if (request.getParameter("itemId") != null){
+							json = fileManager.deleteItemById(Integer.parseInt(request.getParameter("itemId")), user);
+						}
+						// /json?remove&itemKey=?
+						else if (request.getParameter("itemKey") != null){
+							json = fileManager.deleteItemByKey(request.getParameter("itemKey"), user);
+						}
 					}
-					// /json?remove&itemKey=?
-					else if (request.getParameter("itemKey") != null){
-						json = fileManager.deleteItemByKey(request.getParameter("itemKey"), user);
+					else{
+						// Remove item from playlist
 					}
 				}
 				else{
-					// Remove item from playlist
+					json.element("error","Invalid nonce. Have you already tried this operation before?");
 				}
+			}
+			else if (request.getParameter("nonce") != null){
+				// Generate and return a new nonce
+				// /json?nonce
+				String nonce = MusicUtility.generateNonce(request, user);
+				json.element("nonce",nonce);
 			}
 			
 		} catch (LoginException e) {
