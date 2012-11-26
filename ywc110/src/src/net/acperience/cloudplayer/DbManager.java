@@ -36,12 +36,18 @@ public class DbManager {
 	private static final String listPlaylistSQL = "SELECT * FROM Cloud_Playlist WHERE UserId = ? ORDER BY PlaylistName;";
 	private PreparedStatement insertPlaylistStatement = null;
 	private static final String insertPlaylistSQL = "INSERT INTO Cloud_Playlist VALUES(DEFAULT, ?, ?) RETURNING PlaylistId;";
-	private PreparedStatement getPlaylistByNameStatement = null;
-	private static final String getPlaylistByNameSQL = "SELECT * FROM Cloud_Playlist WHERE UserId = ? AND PlaylistName = ? ;";
 	private PreparedStatement getPlaylistByIdStatement = null;
 	private static final String getPlaylistByIdSQL = "SELECT * FROM Cloud_Playlist WHERE UserId = ? AND PlaylistId = ?;";
 	private PreparedStatement renamePlaylistByIDStatement = null;
 	private static final String renamePlaylistByIDSQL = "UPDATE Cloud_Playlist SET PlaylistName = ? WHERE UserId = ? AND PlaylistId = ?";
+	
+	// Playlist Items
+	private PreparedStatement getPlaylistItemsByIDStatement = null;
+	private static final String getPlaylistItemsByIDSQL = "SELECT * FROM cloud_item NATURAL JOIN cloud_playlistitem "
+			+ "NATURAL JOIN cloud_playlist WHERE cloud_item.userid = ? AND cloud_playlist.playlistid= ?;";
+	private PreparedStatement getPlaylistItemsByNameStatement = null;
+	private static final String getPlaylistItemsNameSQL = "SELECT * FROM cloud_item NATURAL JOIN cloud_playlistitem "
+			+ "NATURAL JOIN cloud_playlist WHERE cloud_item.userid = ? AND cloud_playlist.playlistname= ?;";
 	
 	// Create a connection and populate prepared statements for performance reasons
 	private DbManager(String uri, String user, String pass) throws SQLException{
@@ -58,8 +64,11 @@ public class DbManager {
 		listPlaylistStatement = connection.prepareStatement(listPlaylistSQL);
 		insertPlaylistStatement = connection.prepareStatement(insertPlaylistSQL);
 		getPlaylistByIdStatement = connection.prepareStatement(getPlaylistByIdSQL);
-		getPlaylistByNameStatement = connection.prepareStatement(getPlaylistByNameSQL);
 		renamePlaylistByIDStatement = connection.prepareStatement(renamePlaylistByIDSQL);
+		
+		// Playlist Items
+		getPlaylistItemsByIDStatement = connection.prepareStatement(getPlaylistItemsByIDSQL);
+		getPlaylistItemsByNameStatement = connection.prepareStatement(getPlaylistItemsNameSQL);
 	}
 	
 	/**
@@ -173,11 +182,7 @@ public class DbManager {
 	 */
 	public int insertPlaylist(String userId, String playlistName) throws SQLException{
 		// Try to see if the user already has something like this
-		ResultSet result = null;
-		result = getPlaylistByName(userId, playlistName);
-		
-		if (result.next() == true)
-			return result.getInt(1);
+		ResultSet result;
 		
 		insertPlaylistStatement.setString(1, playlistName);
 		insertPlaylistStatement.setString(2, userId);
@@ -200,36 +205,7 @@ public class DbManager {
 		getPlaylistByIdStatement.setInt(2, playlistId);
 		return getPlaylistByIdStatement.executeQuery();
 	}
-	/**
-	 * Get playlist by name
-	 * @param userID
-	 * @param playlistName
-	 * @return
-	 * @throws SQLException
-	 */
-	public ResultSet getPlaylistByName(String userID, String playlistName) throws SQLException{
-		getPlaylistByNameStatement.setString(1, userID);
-		getPlaylistByNameStatement.setString(2, playlistName);
-		return getPlaylistByNameStatement.executeQuery();
-	}
-	
-	/**
-	 * Rename a playlist based on its original name.
-	 * Throws an SQLException if no such row exists.
-	 * @param userID
-	 * @param oldPlaylistName
-	 * @param newPlaylistName 
-	 * @throws SQLException Throws an SQLException if no such playlist exists.
-	 */
-	public void renamePlaylistByName(String userID, String oldPlaylistName, String newPlaylistName) throws SQLException{
-		// Get the playlist
-		ResultSet test = getPlaylistByName(userID, oldPlaylistName);
-		
-		if (!test.next())
-			throw new SQLException("Playlist with name " + oldPlaylistName + " does not exist.");
-		
-		renamePlaylist(userID, test.getInt("playlistID"), newPlaylistName);
-	}
+
 	
 	/**
 	 * Rename playlist based on ID.
@@ -271,6 +247,32 @@ public class DbManager {
 	public ResultSet getPlaylistsByUser(String userID) throws SQLException{
 		listPlaylistStatement.setString(1, userID);
 		return listPlaylistStatement.executeQuery();
+	}
+	
+	/**
+	 * Gets the list of items on a playlist
+	 * @param userID
+	 * @param playlistID
+	 * @return
+	 * @throws SQLException
+	 */
+	public ResultSet getPlaylistItemsByID(String userID, int playlistID) throws SQLException{
+		getPlaylistItemsByIDStatement.setString(1, userID);
+		getPlaylistItemsByIDStatement.setInt(2, playlistID);
+		return getPlaylistItemsByIDStatement.executeQuery();
+	}
+	
+	/**
+	 * Gets the list of items of a playlist
+	 * @param userID
+	 * @param playlistName
+	 * @return
+	 * @throws SQLException
+	 */
+	public ResultSet getPlaylistItemsByName(String userID, String playlistName) throws SQLException{
+		getPlaylistItemsByNameStatement.setString(1, userID);
+		getPlaylistItemsByNameStatement.setString(2, playlistName);
+		return getPlaylistItemsByNameStatement.executeQuery();
 	}
 	
 	/**
