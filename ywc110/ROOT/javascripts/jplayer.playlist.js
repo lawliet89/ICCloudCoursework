@@ -222,7 +222,7 @@
 
 			// Create remove control
             // Access Custom data via http://stackoverflow.com/questions/7423753/access-custom-attributes-via-jquery
-			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "' itemId='" + media.id + "' playlistId='" + PlaylistManager.currentPlaylist + "'>&times;</a>";
+			listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "' data-itemId='" + media.id + "' data-playlistId='" + PlaylistManager.currentPlaylist + "'>&times;</a>";
 
 			// Create links to free media
 			if(media.free) {
@@ -272,8 +272,9 @@
 			// Create .live() handlers for the remove controls
 			$(self.cssSelector.playlist + " a." + this.options.playlistOptions.removeItemClass).die("click").live("click", function() {
 				var index = $(this).parent().parent().index();
-                
-                PlaylistManager.deleteItem( $($this).data("itemId"), $(this).data("playlistId"), index );
+                var itemId = $(this).data("itemid");
+                var playlistId = $(this).data("playlistid");
+                PlaylistManager.deleteItem( itemId , playlistId , index );
                 
                 return false;
                 // Original code

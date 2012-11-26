@@ -11,8 +11,6 @@ import java.util.List;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -32,6 +30,7 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
+import org.jets3t.service.ServiceException;
 import org.jets3t.service.acl.AccessControlList;
 import org.jets3t.service.acl.GroupGrantee;
 import org.jets3t.service.acl.Permission;
@@ -240,9 +239,9 @@ public class FileManager {
 						
 						try {
 							if (db != null && itemId != 0)
-								db.deleteItem(itemId);
+								db.deleteItemById(user, itemId);
 						} catch (SQLException e1) {
-							// Seriously? so Fucked up?
+							// Seriously? so screwed up?
 							jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e1));
 						} 
 					} catch (Exception e) {		// From writing upload file to cache
@@ -261,16 +260,15 @@ public class FileManager {
 	
 	/**
 	 * Returns a JSONObject containing a list of files belonging to a user 
-	 * @param request
+	 * @param user
 	 * @return
 	 * @throws LoginException
 	 * @throws SecurityException
 	 * @throws SQLException 
 	 * @throws IOException 
 	 */
-	public JSONObject getItems(HttpServletRequest request) throws LoginException, SecurityException, IOException, SQLException{
+	public JSONObject getItems(MusicKerberos user) throws LoginException, SecurityException, IOException, SQLException{
 		JSONObject json = new JSONObject();
-		MusicKerberos user = MusicKerberos.createMusicKerberos(request, context);
 		DbManager db = DbManager.getInstance(context);
 		
 		ResultSet results = db.getItems(user.getUserId());
@@ -301,31 +299,19 @@ public class FileManager {
 	}
 	
 	/**
-	 * Based on HTTP Request, return details for one item
-	 * @param request
-	 * @param response 
-	 * @return JSONObject populated with details, or an empty object if illegal or no request made
-	 * @throws SecurityException 
-	 * @throws LoginException 
-	 * @throws SQLException 
-	 * @throws IOException 
+	 * Internal method to handle item requests;
+	 * @param user
+	 * @param results
+	 * @return
+	 * @throws LoginException
+	 * @throws SecurityException
+	 * @throws IOException
+	 * @throws SQLException
 	 */
-	public JSONObject getItem(HttpServletRequest request, HttpServletResponse response) 
-			throws LoginException, SecurityException, IOException, SQLException{
+	private JSONObject getItem(MusicKerberos user, ResultSet results) 
+			throws IOException, SQLException{
 		JSONObject json = new JSONObject();
-		MusicKerberos user = MusicKerberos.createMusicKerberos(request, context);
-		DbManager db = DbManager.getInstance(context);
-		
-		ResultSet results = null;
-		if (request.getParameter("key") != null)
-			results = db.getItemByKey(request.getParameter("key"), user.getUserId());
-		else if (request.getParameter("id") != null){
-			try{
-				results = db.getItemById(Integer.parseInt(request.getParameter("id")), user.getUserId());
-			} catch (NumberFormatException e){
-				// Illegal format. Ignored
-			}
-		}
+
 		if (results != null && results.next()){
 			String url = getUrl(results.getString("itemkey"), user.getUserBucketName());
 			json.element("id", results.getInt("itemid"));
@@ -337,11 +323,99 @@ public class FileManager {
 			json.element("duration", results.getInt("itemDuration"));
 			json.element("url", url);
 			json.element(getJPlayerAttributeName(url), url);
-			if (request.getParameter("redirect") != null)
-				response.sendRedirect(url);
 		}
 		if (json.isEmpty())
 			json.element("error", "Incorrect request parameter, unauthorised access, or item was not found.");
+		return json;
+	}
+	
+	/**
+	 * Get items by Key
+	 * @param itemKey
+	 * @param user
+	 * @return
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public JSONObject getItemByKey(String itemKey, MusicKerberos user) throws IOException, SQLException{
+		DbManager db = DbManager.getInstance(context);
+		return getItem(user,db.getItemByKey(itemKey, user.getUserId()));
+	}
+	/**
+	 * Get items by ID
+	 * @param itemId
+	 * @param user
+	 * @return
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	public JSONObject getItemById(int itemId, MusicKerberos user) throws IOException, SQLException{
+		DbManager db = DbManager.getInstance(context);
+		return getItem(user,db.getItemById(itemId, user.getUserId()));
+	}
+	
+	/**
+	 * Delete item from the entire system
+	 * @param itemId
+	 * @param user
+	 * @return
+	 * @throws SQLException 
+	 * @throws IOException 
+	 */
+	public JSONObject deleteItemById(int itemId, MusicKerberos user) throws IOException, SQLException{
+		JSONObject json = new JSONObject();
+		DbManager db = DbManager.getInstance(context);
+		
+		// Let's fetch the Object Key first
+		JSONObject result = getItemById(itemId, user);
+		if (!result.has("key")){
+			json.element("error", "No such item found.");
+			return json;
+		}
+		String itemKey = result.getString("key");
+		
+		// Delete it now
+		db.deleteItemById(user, itemId);
+		
+		// Remove from S3
+		try{
+			// Delete object from S3		
+			s3Service.deleteObject(user.getUserBucketName(), itemKey);
+			json.element("success", true);
+		}
+		catch (ServiceException e){
+			// Doesn't really matter
+			json.element("exception", ExceptionUtils.getStackTrace(e));
+		} 
+		return json;
+	}
+
+	/**
+	 * Delete item from the entire system
+	 * @param itemId
+	 * @param user
+	 * @return
+	 * @throws SQLException 
+	 * @throws IOException 
+	 */
+	public JSONObject deleteItemByKey(String itemKey, MusicKerberos user) throws IOException, SQLException{
+		JSONObject json = new JSONObject();
+		DbManager db = DbManager.getInstance(context);
+		
+		
+		// Delete it now
+		db.deleteItemByKey(user, itemKey);
+		
+		// Remove from S3
+		try{
+			// Delete object from S3		
+			s3Service.deleteObject(user.getUserBucketName(), itemKey);
+			json.element("success", true);
+		}
+		catch (ServiceException e){
+			// Doesn't really matter
+			json.element("exception", ExceptionUtils.getStackTrace(e));
+		} 
 		return json;
 	}
 	

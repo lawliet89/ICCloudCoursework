@@ -69,10 +69,49 @@ public class ServletJSON extends HttpServlet {
 			/*
 			 * Time to handle
 			 */
+			
+			// Do a simple list of all the items belonging to the user
+			// /json?list
 			if (request.getParameter("list") != null)
-				json = fileManager.getItems(request);
-			else if (request.getParameter("item") != null)
-				json = fileManager.getItem(request, response);
+				json = fileManager.getItems(user);
+			
+			// Retrieve detail of a single item
+			else if (request.getParameter("item") != null){
+				
+				// /json?item&itemKey=?[&redirect]
+				if (request.getParameter("itemKey") != null)
+					json = fileManager.getItemByKey(request.getParameter("itemKey"), user);
+					if (request.getParameter("redirect") != null)
+						response.sendRedirect(json.getString("url"));
+					
+				// /json?item&itemId=?[&redirect]
+				else if (request.getParameter("itemId") != null){
+					int itemId = Integer.parseInt(request.getParameter("itemId"));
+					json = fileManager.getItemById(itemId, user);
+					if (request.getParameter("redirect") != null)
+						response.sendRedirect(json.getString("url"));
+				}
+			}
+			
+			// Remove an item from the system or from a playlist
+			else if (request.getParameter("remove") != null){
+				
+				if (request.getParameter("playlistId") == null){
+					// Delete item
+					
+					// /json?remove&itemId=?
+					if (request.getParameter("itemId") != null){
+						json = fileManager.deleteItemById(Integer.parseInt(request.getParameter("itemId")), user);
+					}
+					// /json?remove&itemKey=?
+					else if (request.getParameter("itemKey") != null){
+						json = fileManager.deleteItemByKey(request.getParameter("itemKey"), user);
+					}
+				}
+				else{
+					// Remove item from playlist
+				}
+			}
 			
 		} catch (LoginException e) {
 			json.element("exception", ExceptionUtils.getStackTrace(e));
@@ -82,7 +121,11 @@ public class ServletJSON extends HttpServlet {
 			json.element("exception", ExceptionUtils.getStackTrace(e));
 		} catch (SQLException e) {
 			json.element("exception", ExceptionUtils.getStackTrace(e));
+		} catch (NumberFormatException e){
+			json.element("exception", ExceptionUtils.getStackTrace(e));
+			json.element("error", "ID invalid.");
 		}
+    	
     	finally{
     		out.write(json.toString(4));
     		out.close();

@@ -49,7 +49,24 @@ var PlaylistManager = {
         this.loadPlaylist(this.currentPlaylist);
     },
     
-    deleteItem: function(itemId, playlistId, playlistIndex){
+    deleteItem: function(itemId, playlistId, playlistIndex){        
+        if (playlistId == undefined || playlistId == 0){
+            if (!confirm("Are you sure you want to delete the file? \n\nThis is irreversible."))
+                return;
+            // Delete Item
+            $("#playlistLoading").fadeIn("fast");
+            $.getJSON("/json?remove&itemId=" + itemId, function(data){
+                $("#playlistLoading").fadeOut("fast");
+                if (data.success){
+                    $().toastmessage('showSuccessToast', "File deleted");
+                    PlaylistManager.playlist.remove(playlistIndex);
+                }
+                else{
+                    $().toastmessage('showErrorToast', "File could not be deleted.");
+                }
+            });
+
+        }
     }
 }
 // wait for the DOM to be loaded 

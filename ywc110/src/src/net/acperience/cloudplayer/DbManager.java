@@ -21,21 +21,25 @@ public class DbManager {
 	private static final String insertItemSQL = "INSERT INTO Cloud_Item VALUES(DEFAULT, ?, ?, ?, ?, ? ,?, ?) RETURNING ItemId;";
 	private PreparedStatement listItemStatement = null;
 	private static final String listItemSQL = "SELECT * FROM Cloud_Item WHERE UserId = ? ORDER BY itemartist, itemalbum,  itemtitle;";
-	private PreparedStatement deleteItemStatement = null;
-	private static final String deleteItemSQL = "DELETE FROM Cloud_Item WHERE ItemId = ?;";
 	private PreparedStatement getItemByKeyStatement = null;
 	private static final String getItemSQL = "SELECT * FROM Cloud_Item WHERE UserId = ? AND ItemKey = ?;";
 	private PreparedStatement getItemByIdStatement = null;
 	private static final String getItemByIdSQ = "SELECT * FROM Cloud_Item WHERE UserId = ? AND ItemId = ?;";
+	private PreparedStatement deleteItemByIdStatement = null;
+	private static final String deleteItemByIdSQL = "DELETE FROM Cloud_Item WHERE UserId = ? AND ItemId = ?;";
+	private PreparedStatement deleteItemByKeyStatement = null;
+	private static final String deleteItemByKeySQL = "DELETE FROM Cloud_Item WHERE UserId = ? AND ItemKey = ?;";
 	
 	// Create a connection and populate prepared statements for performance reasons
 	private DbManager(String uri, String user, String pass) throws SQLException{
 		connection = DriverManager.getConnection(uri,user,pass);
+		// Items Related
 		insertItemStatement = connection.prepareStatement(insertItemSQL);
 		listItemStatement = connection.prepareStatement(listItemSQL);
-		deleteItemStatement = connection.prepareStatement(deleteItemSQL);
 		getItemByKeyStatement = connection.prepareStatement(getItemSQL);
 		getItemByIdStatement = connection.prepareStatement(getItemByIdSQ);
+		deleteItemByIdStatement = connection.prepareStatement(deleteItemByIdSQL);
+		deleteItemByKeyStatement = connection.prepareStatement(deleteItemByKeySQL);
 	}
 	
 	/**
@@ -112,12 +116,25 @@ public class DbManager {
 	
 	/**
 	 * Delete an item
+	 * @param user 
 	 * @param itemId
 	 * @throws SQLException
 	 */
-	public void deleteItem(int itemId) throws SQLException{
-		deleteItemStatement.setInt(1, itemId);
-		deleteItemStatement.executeUpdate();
+	public void deleteItemById(MusicKerberos user, int itemId) throws SQLException{
+		deleteItemByIdStatement.setString(1, user.getUserId());
+		deleteItemByIdStatement.setInt(2, itemId);
+		deleteItemByIdStatement.executeUpdate();
+	}
+	/**
+	 * Delete an item
+	 * @param user
+	 * @param itemKey
+	 * @throws SQLException
+	 */
+	public void deleteItemByKey(MusicKerberos user, String itemKey) throws SQLException{
+		deleteItemByKeyStatement.setString(1, user.getUserId());
+		deleteItemByKeyStatement.setString(2, itemKey);
+		deleteItemByKeyStatement.executeUpdate();
 	}
 	
 	/**
