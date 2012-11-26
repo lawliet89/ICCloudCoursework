@@ -45,9 +45,6 @@ public class DbManager {
 	private PreparedStatement getPlaylistItemsByIDStatement = null;
 	private static final String getPlaylistItemsByIDSQL = "SELECT * FROM cloud_item NATURAL JOIN cloud_playlistitem "
 			+ "NATURAL JOIN cloud_playlist WHERE cloud_item.userid = ? AND cloud_playlist.playlistid= ?;";
-	private PreparedStatement getPlaylistItemsByNameStatement = null;
-	private static final String getPlaylistItemsNameSQL = "SELECT * FROM cloud_item NATURAL JOIN cloud_playlistitem "
-			+ "NATURAL JOIN cloud_playlist WHERE cloud_item.userid = ? AND cloud_playlist.playlistname= ?;";
 	
 	// Create a connection and populate prepared statements for performance reasons
 	private DbManager(String uri, String user, String pass) throws SQLException{
@@ -68,7 +65,6 @@ public class DbManager {
 		
 		// Playlist Items
 		getPlaylistItemsByIDStatement = connection.prepareStatement(getPlaylistItemsByIDSQL);
-		getPlaylistItemsByNameStatement = connection.prepareStatement(getPlaylistItemsNameSQL);
 	}
 	
 	/**
@@ -260,19 +256,6 @@ public class DbManager {
 		getPlaylistItemsByIDStatement.setString(1, userID);
 		getPlaylistItemsByIDStatement.setInt(2, playlistID);
 		return getPlaylistItemsByIDStatement.executeQuery();
-	}
-	
-	/**
-	 * Gets the list of items of a playlist
-	 * @param userID
-	 * @param playlistName
-	 * @return
-	 * @throws SQLException
-	 */
-	public ResultSet getPlaylistItemsByName(String userID, String playlistName) throws SQLException{
-		getPlaylistItemsByNameStatement.setString(1, userID);
-		getPlaylistItemsByNameStatement.setString(2, playlistName);
-		return getPlaylistItemsByNameStatement.executeQuery();
 	}
 	
 	/**

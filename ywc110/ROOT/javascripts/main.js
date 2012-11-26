@@ -31,7 +31,7 @@ var PlaylistManager = {
             // Default
             requestURL = "/json?list";
         else
-            requestURL = "/json?list&id=" + playlistId;
+            requestURL = "/json?list&playlistId=" + playlistId;
         
         // Clear playlist
         PlaylistManager.playlist.setPlaylist([]);
@@ -47,7 +47,7 @@ var PlaylistManager = {
                 $("#playlistNameDisplay").html("All Items");
             }
             else{
-                $("#playlistNameDisplay").html(playlistName);
+                $("#playlistNameDisplay").html(data.playlistName);
             }
         });
     },
@@ -89,7 +89,7 @@ var PlaylistManager = {
             
             try{
                 $.each(data.playlists, function(index, value){
-                    list += '<li id="playlist-li-"' + value.playlistId + '"><span id="playlist-' 
+                    list += '<li id="playlist-li-' + value.playlistId + '"><span id="playlist-' 
                          + value.playlistId + '" class="playlistEditable" data-playlistId="' + value.playlistId + '" '
                          + 'onclick="PlaylistManager.loadPlaylist(' + value.playlistId + ');"'
                          + '>' + value.playlistName + '</span>'

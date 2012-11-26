@@ -73,10 +73,13 @@ public class ServletJSON extends HttpServlet {
 			 */
 			
 			// Do a simple list of all the items belonging to the user
-			// /json?list
-			if (request.getParameter("list") != null)
-				json = fileManager.getItems(user);
-			
+			// /json?list[&playlistId=xx]
+			if (request.getParameter("list") != null){
+				if (request.getParameter("playlistId") == null || request.getParameter("playlistId").equals("0"))
+					json = fileManager.getItems(user);
+				else
+					json = fileManager.getPlaylistItemsByID(user, Integer.parseInt(request.getParameter("playlistId")));
+			}
 			// Retrieve detail of a single item
 			else if (request.getParameter("item") != null){
 				

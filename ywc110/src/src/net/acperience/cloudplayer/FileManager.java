@@ -299,6 +299,53 @@ public class FileManager {
 	}
 	
 	/**
+	 * Get a list of items for a playlist
+	 * @param user
+	 * @param playlistID
+	 * @return
+	 * @throws SQLException 
+	 * @throws IOException 
+	 */
+	public JSONObject getPlaylistItemsByID(MusicKerberos user, int playlistID) throws IOException, SQLException{
+		JSONObject json = new JSONObject();
+		DbManager db = DbManager.getInstance(context);
+		
+		ResultSet results = db.getPlaylistItemsByID(user.getUserId(), playlistID);
+		JSONArray jsonArray = new JSONArray();
+		while(results.next()){
+			if (!json.has("playlistName"))
+				json.element("playlistName", results.getString("playlistName"));
+			JSONObject jsonCurrent = new JSONObject();
+			try {
+				String url = getUrl(results.getString("itemkey"), user.getUserBucketName());
+				jsonCurrent.element("id", results.getInt("itemid"));
+				jsonCurrent.element("title", results.getString("itemtitle"));
+				jsonCurrent.element("artist", results.getString("itemartist"));
+				jsonCurrent.element("album", results.getString("itemalbum"));
+				jsonCurrent.element("key", results.getString("itemkey"));
+				jsonCurrent.element("year",results.getInt("itemyear"));
+				jsonCurrent.element("duration", results.getInt("itemDuration"));
+				jsonCurrent.element("url", url);
+				//JPlayer specific
+				jsonCurrent.element(getJPlayerAttributeName(url), url);
+				jsonCurrent.element("free", true);		// Allow access to the URL
+				jsonArray.add(jsonCurrent);
+			} catch (SQLException e) {
+				json.element("exception", ExceptionUtils.getStackTrace(e));
+			}
+		}
+		
+		// Oh, empty playlist
+		if (!json.has("playlistName")){
+			results = db.getPlaylistById(user.getUserId(), playlistID);
+			json.element("playlistName", results.getString("playlistName"));
+		}
+		json.element("items", jsonArray);
+		json.element("playlistId", playlistID);
+		return json;
+	}
+	
+	/**
 	 * Internal method to handle item requests;
 	 * @param user
 	 * @param results
