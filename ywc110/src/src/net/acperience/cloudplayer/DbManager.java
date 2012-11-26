@@ -47,6 +47,11 @@ public class DbManager {
 	private PreparedStatement getPlaylistItemsByIDStatement = null;
 	private static final String getPlaylistItemsByIDSQL = "SELECT * FROM cloud_item NATURAL JOIN cloud_playlistitem "
 			+ "NATURAL JOIN cloud_playlist WHERE cloud_item.userid = ? AND cloud_playlist.playlistid= ?;";
+	private PreparedStatement removeItemFromPlaylistStatement = null;
+	private static final String removeItemFromPlaylistSQL = "DELETE FROM cloud_playlistitem WHERE cloud_playlistitem.ItemId IN ("
+			+ "SELECT Cloud_Item.ItemId FROM Cloud_Item NATURAL JOIN cloud_playlistitem WHERE Cloud_Item.userId = ? "
+			+ "AND cloud_playlistitem.ItemID = ? AND cloud_playlistitem.playlistId = ?"
+			+ ");";
 	
 	
 	// Create a connection and populate prepared statements for performance reasons
@@ -69,6 +74,7 @@ public class DbManager {
 		
 		// Playlist Items
 		getPlaylistItemsByIDStatement = connection.prepareStatement(getPlaylistItemsByIDSQL);
+		removeItemFromPlaylistStatement = connection.prepareStatement(removeItemFromPlaylistSQL);
 	}
 	
 	/**
@@ -266,6 +272,21 @@ public class DbManager {
 		getPlaylistItemsByIDStatement.setString(1, userID);
 		getPlaylistItemsByIDStatement.setInt(2, playlistID);
 		return getPlaylistItemsByIDStatement.executeQuery();
+	}
+	
+	/**
+	 * Remove an item from playlist
+	 * @param userId
+	 * @param itemId
+	 * @param playlistId
+	 * @return Number of rows deleted. 
+	 * @throws SQLException
+	 */
+	public int removeItemFromPlaylist(String userId, int itemId, int playlistId) throws SQLException{
+		removeItemFromPlaylistStatement.setString(1, userId);
+		removeItemFromPlaylistStatement.setInt(2, itemId);
+		removeItemFromPlaylistStatement.setInt(3, playlistId);
+		return removeItemFromPlaylistStatement.executeUpdate();
 	}
 	
 	/**

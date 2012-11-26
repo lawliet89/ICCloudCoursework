@@ -102,9 +102,7 @@ public class ServletJSON extends HttpServlet {
 			else if (request.getParameter("remove") != null){
 				// We consume nonce first
 				if (request.getParameter("nonce") != null && MusicUtility.consumeNonce(request, request.getParameter("nonce"))){
-					if (request.getParameter("playlistId") == null){
-						// Delete item
-						
+					if (request.getParameter("playlistId") == null){			
 						// /json?remove&itemId=?
 						if (request.getParameter("itemId") != null){
 							json = fileManager.deleteItemById(Integer.parseInt(request.getParameter("itemId")), user);
@@ -115,7 +113,20 @@ public class ServletJSON extends HttpServlet {
 						}
 					}
 					else{
-						// Remove item from playlist
+						try{
+							// Remove item from playlist
+							// json?remove&itemId=?&playlistId=?
+							DbManager db = DbManager.getInstance(this);
+							int count = db.removeItemFromPlaylist(user.getUserId(), 
+									Integer.parseInt(request.getParameter("itemId")), 
+									Integer.parseInt(request.getParameter("playlistId")));
+							json.element("success",true);
+							json.element("count",count);
+						}
+						catch(Exception e){
+							json.element("success", false);
+							throw e;
+						}
 					}
 				}
 				else{
@@ -228,6 +239,8 @@ public class ServletJSON extends HttpServlet {
 		} catch (NumberFormatException e){
 			json.element("exception", ExceptionUtils.getStackTrace(e));
 			json.element("error", "ID invalid.");
+		} catch (Exception e){
+			json.element("exception", ExceptionUtils.getStackTrace(e));
 		}
     	
     	finally{

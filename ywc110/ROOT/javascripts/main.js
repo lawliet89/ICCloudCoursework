@@ -75,6 +75,21 @@ var PlaylistManager = {
             });
 
         }
+        else{
+            // Remove Item
+            $("#playlistLoading").fadeIn("fast");
+            $.getJSON("/json?remove&itemId=" + itemId + "&playlistId="+ playlistId +"&nonce=" + NonceManager.nonce, function(data){
+                NonceManager.getNewNonce();
+                $("#playlistLoading").fadeOut("fast");
+                if (data.success){
+                    $().toastmessage('showSuccessToast', "Item removed from playlist.");
+                    PlaylistManager.playlist.remove(playlistIndex);
+                }
+                else{
+                    $().toastmessage('showErrorToast', "Item could not be removed from playlist.");
+                }
+            });
+        }
     },
     
     loadListOfPlaylists: function(){
