@@ -104,9 +104,11 @@ var PlaylistManager = {
         });
     },
     
-    makePlaylistsEditable: function(){
+    makePlaylistsEditable: function(element){
+        if (element == undefined)
+            element = "#playlistUl li span.playlistEditable";
         // Initialise rename playlist editable
-        $("#playlistUl li span.playlistEditable").editable("/json", {
+        $(element).editable("/json", {
             indicator: '<img src="/images/progress.gif">',
             tooltip: 'Double click to rename.',
             style: 'width: 75%; display:inline-block; padding:0; margin:0;',
@@ -141,8 +143,51 @@ var PlaylistManager = {
     deletePlaylist: function(playlistId){
         if (playlistId == undefined || playlistId < 1)
             return;
-            
+        if (!confirm("Are you sure you want to delete the playlist? \nThis is irreversible.")) return;
+        $("#playlistLoading").fadeIn("fast");
+        $.getJSON("/json?deletePlaylist&playlistId="+ playlistId + "&nonce=" + NonceManager.nonce, function(data){
+            $("#playlistLoading").fadeIn("fast");
+
+            if (data.success == true){
+                NonceManager.getNewNonce();
+                $().toastmessage('showSuccessToast', "Playlist deleted.");
+                $("#playlist-li-" + data.playlistId).fadeOut(400, function(){
+                    $("#playlist-li-" + data.playlistId).remove();
+                });                
+                
+                if (PlaylistManager.currentPlaylist == data.playlistId)
+                    PlaylistManager.loadPlaylist(0);
+            }
+            else{
+                $().toastmessage('showErrorToast', "Failed to delete playlist.");
+            }
+        });
         
+    },
+    addPlaylist: function(){
+        $("#playlistsLoading").fadeIn('fast');
+        $.getJSON("/json?newPlaylist&nonce=" + NonceManager.nonce, function(data){
+            $("#playlistsLoading").fadeOut('fast');
+            
+            if (data.success == true){
+                NonceManager.getNewNonce();
+                $().toastmessage('showSuccessToast', "Playlist created.");
+                var list = '<li id="playlist-li-' + data.playlistId + '"><span id="playlist-' 
+                         + data.playlistId + '" class="playlistEditable" data-playlistId="' + data.playlistId + '" '
+                         + 'onclick="PlaylistManager.loadPlaylist(' + data.playlistId + ');"'
+                         + '>' + data.playlistName + '</span>'
+                         + '<img src="/images/delete.png" onclick="PlaylistManager.deletePlaylist(' + data.playlistId + ');" class="delete-button" title="Delete playlist" />'
+                         + '</li>';
+                         
+                $("#playlistUl").append(list);
+                PlaylistManager.makePlaylistsEditable('#playlist-' + data.playlistId);
+                
+                $("#playlist-"+data.playlistId).trigger("dblclick");
+            }
+            else{
+                $().toastmessage('showErrorToast', "Failed to create a new playlist.");
+            }
+        });
     }
 }
 

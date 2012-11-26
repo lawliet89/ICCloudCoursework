@@ -111,6 +111,7 @@
         <!-- Playlists -->
         <div class="five columns">
             <div><h2 style="display:inline; margin-right: 10px;">Playlists</h2> 
+            <a href="" onclick="PlaylistManager.addPlaylist(); return false;" title="Add new playliss"><img src="/images/add.png" style="display:inline; margin-right: 10px;" /></a>
             <a href="" onclick="PlaylistManager.loadListOfPlaylists(); return false;" title="Reload playlists"><img src="/images/refresh.png" style="display:inline; margin-right: 10px;" /></a>
             <img class="hidden" id="playlistsLoading" src="/images/progress.gif" alt="" /> </div>
             

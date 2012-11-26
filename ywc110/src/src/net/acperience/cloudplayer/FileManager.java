@@ -338,6 +338,7 @@ public class FileManager {
 		// Oh, empty playlist
 		if (!json.has("playlistName")){
 			results = db.getPlaylistById(user.getUserId(), playlistID);
+			results.next();
 			json.element("playlistName", results.getString("playlistName"));
 		}
 		json.element("items", jsonArray);

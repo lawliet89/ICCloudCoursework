@@ -165,6 +165,48 @@ public class ServletJSON extends HttpServlet {
 					json.element("playlistId", playlistId);
 				}
 			}
+			else if (request.getParameter("newPlaylist") != null){
+				// Consume nonce first
+				if (request.getParameter("nonce") != null && MusicUtility.consumeNonce(request, request.getParameter("nonce"))){
+					try{
+						DbManager db = DbManager.getInstance(this);
+						// Insert a new playlist
+						int playlistId = db.insertPlaylist(user.getUserId(), "Untitled New Playlist");
+						json.element("success",true);
+						json.element("playlistId", playlistId);
+						json.element("playlistName", "Untitled New Playlist");
+						
+					} catch(SQLException e){
+						json.element("success", false);
+						throw e;
+					}
+				}
+				else{
+					json.element("success", false);
+					json.element("error","Invalid nonce. Have you already tried this operation before?");
+					throw new RuntimeException("Invalid nonce");
+				}
+			}
+			else if (request.getParameter("deletePlaylist") != null){
+				// Consume nonce first
+				if (request.getParameter("nonce") != null && MusicUtility.consumeNonce(request, request.getParameter("nonce"))){
+					try{
+						DbManager db = DbManager.getInstance(this);
+						db.deletePlaylist(user.getUserId(), Integer.parseInt(request.getParameter("playlistId")));
+						json.element("success",true);
+						json.element("playlistId", Integer.parseInt(request.getParameter("playlistId")));
+						
+					} catch(SQLException e){
+						json.element("success", false);
+						throw e;
+					}
+				}
+				else{
+					json.element("success", false);
+					json.element("error","Invalid nonce. Have you already tried this operation before?");
+					throw new RuntimeException("Invalid nonce");
+				}
+			}
 			else if (request.getParameter("playlists") != null){
 				json = fileManager.listPlaylists(user);
 			}
