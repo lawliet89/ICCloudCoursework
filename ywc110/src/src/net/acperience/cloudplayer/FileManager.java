@@ -239,7 +239,7 @@ public class FileManager {
 						
 						try {
 							if (db != null && itemId != 0)
-								db.deleteItemById(user, itemId);
+								db.deleteItemById(user.getUserId(), itemId);
 						} catch (SQLException e1) {
 							// Seriously? so screwed up?
 							jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e1));
@@ -375,7 +375,7 @@ public class FileManager {
 		String itemKey = result.getString("key");
 		
 		// Delete it now
-		db.deleteItemById(user, itemId);
+		db.deleteItemById(user.getUserId(), itemId);
 		
 		// Remove from S3
 		try{
@@ -404,7 +404,7 @@ public class FileManager {
 		
 		
 		// Delete it now
-		db.deleteItemByKey(user, itemKey);
+		db.deleteItemByKey(user.getUserId(), itemKey);
 		
 		// Remove from S3
 		try{
@@ -416,6 +416,30 @@ public class FileManager {
 			// Doesn't really matter
 			json.element("exception", ExceptionUtils.getStackTrace(e));
 		} 
+		return json;
+	}
+	
+	/**
+	 * Do a listing of the user's playlist. Does not include the "ALL" playlist
+	 * @param user
+	 * @return
+	 * @throws SQLException 
+	 * @throws IOException 
+	 */
+	public JSONObject listPlaylists(MusicKerberos user) throws IOException, SQLException{
+		JSONObject json = new JSONObject();
+		DbManager db = DbManager.getInstance(context);
+		JSONArray jsonArray = new JSONArray();
+		
+		ResultSet results = db.getPlaylistsByUser(user.getUserId());
+		while (results.next()){
+			JSONObject jsonCurrent = new JSONObject();
+			jsonCurrent.element("playlistName", results.getString("playlistName"));
+			jsonCurrent.element("playlistId", results.getInt("playlistId"));
+			
+			jsonArray.add(jsonCurrent);
+		}
+		json.element("playlists", jsonArray);
 		return json;
 	}
 	

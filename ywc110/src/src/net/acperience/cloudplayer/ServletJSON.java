@@ -52,8 +52,10 @@ public class ServletJSON extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException{
     	
+    	request.setCharacterEncoding("UTF-8");
+    	response.setCharacterEncoding("UTF-8");
     	PrintWriter out = response.getWriter();
-    	response.setContentType("text/html;charset=UTF-8");
+    	response.setContentType("text/json;charset=UTF-8");
     	JSONObject json = new JSONObject();
     	try {
     		//First up, check that user is logged in
@@ -116,6 +118,52 @@ public class ServletJSON extends HttpServlet {
 				else{
 					json.element("error","Invalid nonce. Have you already tried this operation before?");
 				}
+			}
+			else if (request.getParameter("renamePlaylist") != null 
+					&& request.getParameter("playlistId") != null 
+					&& request.getParameter("playlistName") != null){
+				
+				// To return
+				String playlistName = null;
+				String playlistId = null;
+				try{
+					// Consume nonce first
+					if (request.getParameter("nonce") != null && MusicUtility.consumeNonce(request, request.getParameter("nonce"))){
+						// Let's try to parse playlistId
+						// Of the pattern playlist-xx where xx is the ID number
+						// If this is invalid, an exception will be thrown.
+						int id = Integer.parseInt(request.getParameter("playlistId").substring(9));
+						
+						if (request.getParameter("playlistName").isEmpty())
+							throw new RuntimeException("Playlist name cannot be empty!");
+						
+						// Attempt a rename - will throw exceptions and fail if playlist does not exist. Handled by try and catch below.
+						DbManager db = DbManager.getInstance(this);
+						db.renamePlaylistByID(user.getUserId(), id, request.getParameter("playlistName"));
+						
+						// If we have reached here, then all have succeeded.
+						json.element("success", true);
+						playlistName = request.getParameter("playlistName");
+						playlistId = Integer.toString(id);
+					}
+					else{
+						json.element("error","Invalid nonce. Have you already tried this operation before?");
+						throw new RuntimeException("Invalid nonce");
+					}
+				}
+				finally{	// Assign. We need to assign original values in case of error for client UI to update properly
+					if (playlistName == null || playlistId == null)
+						json.element("success", false);
+					if (playlistName == null)
+						playlistName = request.getParameter("playlistName");
+					if (playlistId == null)
+						playlistId = request.getParameter("playlistId");
+					json.element("playlistName", playlistName);
+					json.element("playlistId", playlistId);
+				}
+			}
+			else if (request.getParameter("playlists") != null){
+				json = fileManager.listPlaylists(user);
 			}
 			else if (request.getParameter("nonce") != null){
 				// Generate and return a new nonce
