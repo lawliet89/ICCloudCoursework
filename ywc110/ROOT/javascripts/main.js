@@ -2,6 +2,7 @@
 var PlaylistManager = {
     playlist: null,
     currentPlaylist: 0,
+    listOfPlaylistCache: null,
     
     initialisePlaylist: function(){
         // Initialise player
@@ -38,6 +39,9 @@ var PlaylistManager = {
         
         $.getJSON(requestURL, function(data) {
             $("#playlistLoading").fadeOut("fast");
+            // Destroy all draggable
+            //PlaylistManager.destroyDraggable();
+            
             PlaylistManager.playlist.setPlaylist(data.items);
             // Change highlighted playlist
             $("#playlist-li-" + PlaylistManager.currentPlaylist).removeClass("highlighted");
@@ -49,6 +53,7 @@ var PlaylistManager = {
             else{
                 $("#playlistNameDisplay").html(data.playlistName);
             }
+            //PlaylistManager.makeDraggable();
         });
     },
     
@@ -102,9 +107,12 @@ var PlaylistManager = {
             // All playlists
             var list="<li id='playlist-li-0' data-playlistId='0' onclick='PlaylistManager.loadPlaylist(0);'>All Items</li>";
             
+            // Cache
+            PlaylistManager.listOfPlaylistCache = data.playlists;
+            
             try{
                 $.each(data.playlists, function(index, value){
-                    list += '<li id="playlist-li-' + value.playlistId + '"><span id="playlist-' 
+                    list += '<li class="playlistDroppable" id="playlist-li-' + value.playlistId + '" data-playlistId="'+value.playlistId+'"><span id="playlist-' 
                          + value.playlistId + '" class="playlistEditable" data-playlistId="' + value.playlistId + '" '
                          + 'onclick="PlaylistManager.loadPlaylist(' + value.playlistId + ');"'
                          + '>' + value.playlistName + '</span>'
@@ -116,6 +124,7 @@ var PlaylistManager = {
             $("#playlistUl").html(list);
             $("#playlist-li-" + PlaylistManager.currentPlaylist).addClass("highlighted");
             PlaylistManager.makePlaylistsEditable();
+            PlaylistManager.makeDroppable();
         });
     },
     
@@ -183,11 +192,10 @@ var PlaylistManager = {
         $("#playlistsLoading").fadeIn('fast');
         $.getJSON("/json?newPlaylist&nonce=" + NonceManager.nonce, function(data){
             $("#playlistsLoading").fadeOut('fast');
-            
+            NonceManager.getNewNonce();
             if (data.success == true){
-                NonceManager.getNewNonce();
                 $().toastmessage('showSuccessToast', "Playlist created.");
-                var list = '<li id="playlist-li-' + data.playlistId + '"><span id="playlist-' 
+                var list = '<li class="playlistDroppable" id="playlist-li-' + data.playlistId + '" data-playlistId="'+data.playlistId+'"><span id="playlist-' 
                          + data.playlistId + '" class="playlistEditable" data-playlistId="' + data.playlistId + '" '
                          + 'onclick="PlaylistManager.loadPlaylist(' + data.playlistId + ');"'
                          + '>' + data.playlistName + '</span>'
@@ -198,9 +206,43 @@ var PlaylistManager = {
                 PlaylistManager.makePlaylistsEditable('#playlist-' + data.playlistId);
                 
                 $("#playlist-"+data.playlistId).trigger("dblclick");
+                PlaylistManager.makeDroppable()
             }
             else{
                 $().toastmessage('showErrorToast', "Failed to create a new playlist.");
+            }
+        });
+    },
+    
+    makeDraggable: function(){
+        $(".draggableItems").draggable({
+            revert: true,
+            //appendTo: 'body',
+            helper: 'clone',
+            scope: 'playlistItems'
+        });
+    },
+    destroyDraggable: function(){
+        $(".draggableItems").draggable("destroy");
+    },
+    makeDroppable: function(){
+        $(".playlistDroppable").droppable({
+            scope: 'playlistItems',
+            hoverClass: 'hoverClass',
+            drop: function(event, ui){
+                var playlistId = $(this).data("playlistid");
+                var itemId = ui.draggable.data("itemid");
+                $("#playlistsLoading").fadeOut('fast');
+                
+                $.getJSON("/json?add&playlistId=" + playlistId + "&itemId=" + itemId + "&nonce=" + NonceManager.nonce, function(data){
+                    $("#playlistsLoading").fadeOut('fast');
+                    NonceManager.getNewNonce();
+                    
+                    if(data.success)
+                        $().toastmessage('showSuccessToast', "Item added to playlist.");
+                    else
+                        $().toastmessage('showErrorToast', "Item could not be added to playlist.");
+                });
             }
         });
     }

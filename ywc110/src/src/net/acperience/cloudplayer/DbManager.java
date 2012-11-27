@@ -52,7 +52,8 @@ public class DbManager {
 			+ "SELECT Cloud_Item.ItemId FROM Cloud_Item NATURAL JOIN cloud_playlistitem WHERE Cloud_Item.userId = ? "
 			+ "AND cloud_playlistitem.ItemID = ? AND cloud_playlistitem.playlistId = ?"
 			+ ");";
-	
+	private PreparedStatement addItemToPlaylistStatement = null;
+	private static final String addItemToPlaylistSQL = "INSERT INTO Cloud_playlistItem VALUES(?,?);";
 	
 	// Create a connection and populate prepared statements for performance reasons
 	private DbManager(String uri, String user, String pass) throws SQLException{
@@ -75,6 +76,7 @@ public class DbManager {
 		// Playlist Items
 		getPlaylistItemsByIDStatement = connection.prepareStatement(getPlaylistItemsByIDSQL);
 		removeItemFromPlaylistStatement = connection.prepareStatement(removeItemFromPlaylistSQL);
+		addItemToPlaylistStatement = connection.prepareStatement(addItemToPlaylistSQL);
 	}
 	
 	/**
@@ -287,6 +289,30 @@ public class DbManager {
 		removeItemFromPlaylistStatement.setInt(2, itemId);
 		removeItemFromPlaylistStatement.setInt(3, playlistId);
 		return removeItemFromPlaylistStatement.executeUpdate();
+	}
+	
+	/**
+	 * Add Item to a playlist
+	 * @param userId
+	 * @param itemId
+	 * @param playlistId
+	 * @throws SQLException
+	 */
+	public void addItemToPlaylist(String userId, int itemId, int playlistId) throws SQLException{
+		// Test if valid item
+		ResultSet result = getItemById(itemId, userId);
+		if (!result.next())
+			throw new SQLException("Invalid item");
+		
+		// Test if valid playlist
+		result = getPlaylistById(userId, playlistId);
+		if (!result.next())
+			throw new SQLException("Invalid playlist");
+		
+		// We can actually insert now
+		addItemToPlaylistStatement.setInt(1, itemId);
+		addItemToPlaylistStatement.setInt(2, playlistId);
+		addItemToPlaylistStatement.execute();
 	}
 	
 	/**

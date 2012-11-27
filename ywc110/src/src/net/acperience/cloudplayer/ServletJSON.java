@@ -221,6 +221,19 @@ public class ServletJSON extends HttpServlet {
 			else if (request.getParameter("playlists") != null){
 				json = fileManager.listPlaylists(user);
 			}
+			else if (request.getParameter("add") != null){
+				try{
+					DbManager db = DbManager.getInstance(this);
+					db.addItemToPlaylist(user.getUserId(), 
+							Integer.parseInt(request.getParameter("itemId")), 
+							Integer.parseInt(request.getParameter("playlistId")));
+					json.element("success",true);
+				}
+				catch (Exception e){
+					json.element("success",false);
+					throw e;
+				}
+			}
 			else if (request.getParameter("nonce") != null){
 				// Generate and return a new nonce
 				// /json?nonce

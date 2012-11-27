@@ -1,5 +1,6 @@
 ﻿<!-- BEGIN: Body-->
 <link href="stylesheets/blue.monday/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+<!-- <link href="stylesheets/ui-lightness/jquery-ui-1.9.2.custom.min.css" rel="stylesheet" type="text/css" /> -->
 <!-- http://www.fyneworks.com/jquery/multiple-file-upload/ -->
 <script src="/javascripts/jquery.MultiFile.pack.js" type="text/javascript" language="javascript"></script> 
 <!-- http://www.malsup.com/jquery/form/ -->
@@ -7,6 +8,7 @@
 <script type="text/javascript" src="javascripts/jquery.jplayer.min.js"></script>
 <script type="text/javascript" src="javascripts/jplayer.playlist.js"></script>
 <script type="text/javascript" src="javascripts/jquery.jeditable.mini.js"></script>
+<script type="text/javascript" src="javascripts/jquery-ui-1.9.2.custom.min.js"></script>
 <script type="text/javascript" src="javascripts/main.js"></script>
 
 <style type="text/css">
@@ -42,6 +44,29 @@
     .delete-button:hover {
         cursor: hand; 
         cursor: pointer;
+    }
+    
+    .draggableItems.ui-draggable-dragging{
+        background-color: #fff;
+        -moz-opacity: 0.85;
+        opacity: 0.85;
+        -ms-filter:"progid:DXImageTransform.Microsoft.Alpha"(Opacity=85);
+        min-width:200px;
+        max-width: 360px;
+        height: 3.5em;
+        overflow:hidden;
+    }
+    .draggableItems.ui-draggable-dragging .jp-free-media,
+    .draggableItems.ui-draggable-dragging .jp-playlist-item-remove {
+        visibility:hidden;
+        list-style-image: none;
+        list-style-position: outside;
+        list-style-type: none;
+        padding-left:20px;
+    }
+    
+    .hoverClass{
+        background-color: #33B5E5;
     }
 </style>
 
@@ -111,7 +136,7 @@
         <!-- Playlists -->
         <div class="five columns">
             <div><h2 style="display:inline; margin-right: 10px;">Playlists</h2> 
-            <a href="" onclick="PlaylistManager.addPlaylist(); return false;" title="Add new playliss"><img src="/images/add.png" style="display:inline; margin-right: 10px;" /></a>
+            <a href="" onclick="PlaylistManager.addPlaylist(); return false;" title="Add a new playlist"><img src="/images/add.png" style="display:inline; margin-right: 10px;" /></a>
             <a href="" onclick="PlaylistManager.loadListOfPlaylists(); return false;" title="Reload playlists"><img src="/images/refresh.png" style="display:inline; margin-right: 10px;" /></a>
             <img class="hidden" id="playlistsLoading" src="/images/progress.gif" alt="" /> </div>
             
