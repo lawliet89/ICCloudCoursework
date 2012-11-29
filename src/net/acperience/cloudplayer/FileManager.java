@@ -87,7 +87,6 @@ public class FileManager {
 	}
 	
 	public FileManager(HttpServlet context) throws S3ServiceException, IOException{
-		// .. Private constructor. Use getInstance() to get the object
 		this.context = context;
 		
 		// Connect to S3
@@ -217,7 +216,7 @@ public class FileManager {
 			List<FileItem> items = uploadHandler.parseRequest(request);
 			Iterator<FileItem> itr = items.iterator();
 			while(itr.hasNext()) {
-				FileItem item = (FileItem) itr.next();
+				FileItem item = itr.next();
 				// If form field, ignore and carry on
 				if(item.isFormField()) {
 					continue;
@@ -541,6 +540,11 @@ public class FileManager {
 			// Doesn't really matter
 			json.element("exception", ExceptionUtils.getStackTrace(e));
 		} 
+		
+		// Delete Cache
+		File cache = new File(getUserCacheDirectory(user.getUserId()) + itemKey);
+		if (cache.exists())
+			cache.delete();
 		return json;
 	}
 
@@ -570,6 +574,10 @@ public class FileManager {
 			// Doesn't really matter
 			json.element("exception", ExceptionUtils.getStackTrace(e));
 		} 
+		// Delete Cache
+		File cache = new File(getUserCacheDirectory(user.getUserId()) + itemKey);
+		if (cache.exists())
+			cache.delete();		
 		return json;
 	}
 	
