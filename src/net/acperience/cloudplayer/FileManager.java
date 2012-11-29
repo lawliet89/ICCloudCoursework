@@ -1,7 +1,11 @@
 package net.acperience.cloudplayer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +23,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -31,9 +36,9 @@ import org.jaudiotagger.tag.TagException;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
-import org.jets3t.service.acl.AccessControlList;
-import org.jets3t.service.acl.GroupGrantee;
-import org.jets3t.service.acl.Permission;
+//import org.jets3t.service.acl.AccessControlList;
+//import org.jets3t.service.acl.GroupGrantee;
+//import org.jets3t.service.acl.Permission;
 import org.jets3t.service.model.S3Object;
 
 /**
@@ -57,21 +62,27 @@ public class FileManager {
 	 *
 	 */
 	public static enum JPlayerMapping{
-		mp3("mp3"),
-		mp4("m4a"),
-		m4a("m4a"),
-		aac("m4a"),
-		ogg("oga"),
-		oga("oga"),
-		wav("wav");
+		mp3("mp3", "audio/mpeg"),
+		mp4("m4a", "audio/mp4"),
+		m4a("m4a", "audio/mp4"),
+		aac("m4a", "audio/mp4"),
+		ogg("oga", "audio/ogg"),
+		oga("oga", "audio/ogg"),
+		wav("wav", "audio/wav");
 		
 		private final String extension;
-		JPlayerMapping(String extension){
+		private final String mime;
+		JPlayerMapping(String extension, String mime){
 			this.extension = extension;
+			this.mime = mime;
 		}
 		
-		String getExtension(){
+		public String getExtension(){
 			return this.extension;
+		}
+		
+		public String getMime(){
+			return this.mime;
 		}
 	}
 	
@@ -94,6 +105,88 @@ public class FileManager {
 	}
 	
 	/**
+	 * Get an S3Object from the server. WARNING: An InputStream will be created and should be closed
+	 * Or risk server connection starvation
+	 * @param key
+	 * @param user
+	 * @param getData 
+	 * @return
+	 * @throws S3ServiceException 
+	 */
+	@SuppressWarnings("deprecation")
+	private S3Object getS3Object(String key, MusicKerberos user, boolean getData) throws S3ServiceException{
+		//S3Object obj;
+		if (getData)
+			return s3Service.getObject(user.getUserBucket(), key);
+		else
+			return s3Service.getObjectDetails(user.getUserBucket(), key);
+	}
+	
+	/**
+	 * Gets an S3Object without the data
+	 * @param key
+	 * @param user
+	 * @return
+	 * @throws S3ServiceException
+	 */
+	public S3Object getS3Object(String key, MusicKerberos user) throws S3ServiceException{
+		return getS3Object(key, user, false);
+	}
+	
+	
+	/**
+	 * Gets a file object to a file. This will be a cached copy on the server
+	 * @param key
+	 * @param user
+	 * @return
+	 * @throws ServiceException 
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 * @throws NoSuchAlgorithmException 
+	 */
+	public File getFile(String key, MusicKerberos user) 
+			throws NoSuchAlgorithmException, FileNotFoundException, IOException, ServiceException {
+		
+		user.setS3Service(s3Service);
+		S3Object obj = getS3Object(key, user, true);
+		FileOutputStream cacheOutput = null;
+		try{
+			File cache = new File(getUserCacheDirectory(user.getUserId()) + key);
+			
+			// Check if we have a cached file
+			if (!cache.exists()){
+				cacheOutput = new FileOutputStream(cache);
+				downloadFile(obj.getDataInputStream(), cacheOutput);
+			}
+				
+			else{
+				if (!obj.verifyData(cache)){
+					cacheOutput = new FileOutputStream(cache);
+					downloadFile(obj.getDataInputStream(), cacheOutput);
+				}
+					
+			}
+			
+			return cache;
+		}
+		finally{
+			if (cacheOutput != null)
+				cacheOutput.close();
+			obj.closeDataInputStream();
+		}
+	}
+	
+	/**
+	 * Copy file from remote to local
+	 * @param remote
+	 * @param local
+	 * @throws IOException 
+	 */
+	private void downloadFile(InputStream remote, OutputStream local) throws IOException{
+		IOUtils.copy(remote, local);
+	}
+	
+	/**
 	 * Handles the upload in a HTTP POST Requwst
 	 * 
 	 * 
@@ -111,7 +204,7 @@ public class FileManager {
 		
 		// See http://www.servletworld.com/servlet-tutorials/servlet-file-upload-example.html
 		DiskFileItemFactory  fileItemFactory = new DiskFileItemFactory ();
-		fileItemFactory.setSizeThreshold(5*1024*1024);	// Any size above thant his will be stored on disk
+		fileItemFactory.setSizeThreshold(5*1024*1024);	// Any size above than this will be stored on disk
 		// Temp storage
 		fileItemFactory.setRepository(new File(context.getServletContext().getRealPath(TEMP_BASE)));
 		
@@ -136,8 +229,9 @@ public class FileManager {
 					
 					// Write file to cache storage first
 					File file = new File(
-							context.getServletContext().getRealPath(CACHE_BASE)+"/"+user.getUserIdHash() 
-							+ "." + FilenameUtils.getExtension(item.getName()));
+									getUserCacheDirectory(user.getUserId())  + 
+									MusicUtility.generateRandomStringHash(user.getUserId())
+									+ "." + FilenameUtils.getExtension(item.getName()));
 					
 					int itemId = 0;
 					DbManager db = null;
@@ -197,10 +291,15 @@ public class FileManager {
 						s3Object = s3Service.putObject(user.getUserBucket(), s3Object);		
 						
 						// Now let's give it public access
-						AccessControlList acl = s3Service.getObjectAcl(user.getUserBucket(), key);
-						acl.grantPermission(GroupGrantee.ALL_USERS, Permission.PERMISSION_READ);
-						s3Object.setAcl(acl);
-						s3Service.putObjectAcl(user.getUserBucket(), s3Object);
+						//AccessControlList acl = s3Service.getObjectAcl(user.getUserBucket(), key);
+						//acl.grantPermission(GroupGrantee.ALL_USERS, Permission.PERMISSION_READ);
+						//s3Object.setAcl(acl);
+						//s3Service.putObjectAcl(user.getUserBucket(), s3Object);
+						
+						// Rename Cached file to final destination
+						File renamedFile = new File(getUserCacheDirectory(user.getUserId()) + key);
+						if (!file.renameTo(renamedFile))
+							throw new IOException("File failed to be renamed to its final non-cached location.");
 						
 						jsonCurrent.element("key",key);
 						jsonCurrent.element("success", true);
@@ -209,26 +308,31 @@ public class FileManager {
 						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to parse file for meta data");
+						file.delete();
 						
 					} catch (TagException e) { // Reading meta data from uploaded file
 						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to parse file metadata -- is the file corrupted?");
+						file.delete();
 						
 					} catch (ReadOnlyFileException e) { // Reading meta data from uploaded file
 						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Cache file permission error.");
+						file.delete();
 						
 					} catch (InvalidAudioFrameException e) { // Reading meta data from uploaded file
 						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to parse file metadata -- is the file corrupted?");
+						file.delete();
 						
 					} catch (SQLException e) {	// Any database operations
 						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Error performing database operations.");
+						file.delete();
 						continue;
 					} catch (NoSuchAlgorithmException e) {
 						// .. Gonna ignore this, for now. Thrown when the JVM doens't support MD5. Unlikely.
@@ -236,7 +340,7 @@ public class FileManager {
 						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Unable to store file in cloud");
-						
+						file.delete();
 						try {
 							if (db != null && itemId != 0)
 								db.deleteItemById(user.getUserId(), itemId);
@@ -248,9 +352,10 @@ public class FileManager {
 						jsonCurrent.element("success", false); 
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
 						jsonCurrent.element("errorFriendly", "Failed writing file to cache for processing.");
+						file.delete();
 					} finally{
 						json.add(jsonCurrent);
-						file.delete();
+						// file.delete();
 					}
 				}
 			}
@@ -286,7 +391,7 @@ public class FileManager {
 				jsonCurrent.element("duration", results.getInt("itemDuration"));
 				jsonCurrent.element("url", url);
 				//JPlayer specific
-				jsonCurrent.element(getJPlayerAttributeName(url), url);
+				jsonCurrent.element(getJPlayerAttributeName(url), getLocalUrl(results.getString("itemkey"), user.getUserIdHash()));
 				jsonCurrent.element("free", true);		// Allow access to the URL
 				jsonArray.add(jsonCurrent);
 			} catch (SQLException e) {
@@ -327,7 +432,7 @@ public class FileManager {
 				jsonCurrent.element("duration", results.getInt("itemDuration"));
 				jsonCurrent.element("url", url);
 				//JPlayer specific
-				jsonCurrent.element(getJPlayerAttributeName(url), url);
+				jsonCurrent.element(getJPlayerAttributeName(url), getLocalUrl(results.getString("itemkey"), user.getUserIdHash()));
 				jsonCurrent.element("free", true);		// Allow access to the URL
 				jsonArray.add(jsonCurrent);
 			} catch (SQLException e) {
@@ -370,7 +475,8 @@ public class FileManager {
 			json.element("year",results.getInt("itemyear"));
 			json.element("duration", results.getInt("itemDuration"));
 			json.element("url", url);
-			json.element(getJPlayerAttributeName(url), url);
+			json.element(getJPlayerAttributeName(url), getLocalUrl(results.getString("itemkey"), user.getUserIdHash()));
+			json.element("free", true);		// Allow access to the URL
 		}
 		if (json.isEmpty())
 			json.element("error", "Incorrect request parameter, unauthorised access, or item was not found.");
@@ -511,6 +617,7 @@ public class FileManager {
 	
 	/**
 	 * Return the URL to the item based on key and bucket
+	 * For the S3 Server
 	 * @param key
 	 * @param bucket
 	 * @return
@@ -518,6 +625,33 @@ public class FileManager {
 	public static String getUrl(String key, String bucket){
 		return new StringBuilder().append("http://")
 				.append(bucket).append(".s3.bigdatapro.org/")
+				.append(key).toString();
+	}
+	
+	/**
+	 * Get the URL to a file based on the current HTTP Host
+	 * @param key
+	 * @param bucket
+	 * @param prefix
+	 * @return
+	 */
+	public String getLocalUrl(String key, String bucket, HttpServletRequest request){
+		// Get the HTTP Host etc.
+		return new StringBuilder().append("https://").append(request.getServerName())
+				.append(":").append(Integer.toString(request.getServerPort()))
+				.append("/stream/").append(bucket).append("/")
+				.append(key).toString();
+	}
+	
+	/**
+	 * Returns a relative local URL
+	 * @param key
+	 * @param bucker
+	 * @return
+	 */
+	public static String getLocalUrl(String key, String bucket){
+		return new StringBuilder()
+				.append("/stream/").append(bucket).append("/")
 				.append(key).toString();
 	}
 	
@@ -550,4 +684,39 @@ public class FileManager {
 			return "mp3";
 		}
 	}
+	
+	/**
+	 * Return the mime type of a file, based on its extension
+	 * @param key
+	 * @return
+	 */
+	public static String getMime(String key){
+		// Get extension of key
+		String extension = FilenameUtils.getExtension(key).toLowerCase();
+		try{
+			return JPlayerMapping.valueOf(extension).getMime();
+		}
+		catch(IllegalArgumentException e){
+			// Just do a fake MP3 for now
+			return "audio/mpeg";
+		}
+	}
+		
+	/**
+	 * Returns the directory for the current user
+	 * @param userId
+	 * @return
+	 */
+	public String getUserCacheDirectory(String userId){
+		String dir = context.getServletContext().getRealPath(CACHE_BASE)+"/"+ userId + "/";
+		
+		// Check if directory exist
+		File directory = new File(dir);
+		if (!directory.exists())
+			directory.mkdirs();
+		
+		return dir;
+	}
+	
+	
 }

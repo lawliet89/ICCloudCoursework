@@ -240,6 +240,18 @@ public class MusicKerberos extends KerberosAuth {
 		
 	}
 
+/*	@Override
+	public void authenticate(boolean login) throws LoginException{
+		super.authenticate(login);
+		if (getSubject() != null)
+				setupUser();
+	}
+	
+	@Override
+	public void authenticate() throws LoginException{
+		authenticate(true);
+	}*/
+
 	/**
 	 * Creates a MusicKeberos object to get authenticated user data based on the HttpRequest
 	 * 

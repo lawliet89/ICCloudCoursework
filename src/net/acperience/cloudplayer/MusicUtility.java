@@ -137,4 +137,15 @@ public final class MusicUtility {
 		session.removeAttribute("nonce");
 		return true;
 	}
+	
+	/**
+	 * Generate a sha1 hash from a combination of a provided salt plus the current time
+	 * @param salt
+	 * @return
+	 */
+	public static String generateRandomStringHash(String salt){
+		StringBuilder str = new StringBuilder(salt);
+		str.append(new Date().getTime());
+		return sha1(str.toString());
+	}
 }

@@ -59,7 +59,18 @@
       <servlet-name>ServletJSON</servlet-name>
       <url-pattern>/json</url-pattern>
     </servlet-mapping>    
- 
+
+     <servlet>
+      <servlet-name>ServletStream</servlet-name>
+      <servlet-class>net.acperience.cloudplayer.ServletStream</servlet-class>
+      <load-on-startup>5</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+      <servlet-name>ServletStream</servlet-name>
+      <url-pattern>/stream/*</url-pattern>
+    </servlet-mapping>    
+    
     <!-- for static files -->
 <!--    <servlet-mapping>  
         <servlet-name>default</servlet-name>
