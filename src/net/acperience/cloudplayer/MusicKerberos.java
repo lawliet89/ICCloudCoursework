@@ -33,6 +33,7 @@ import org.jets3t.service.model.S3Bucket;
 public class MusicKerberos extends KerberosAuth {
 	
 	private static final String PERSISTENT_NAME = "MusicKerberosSubject";
+	private static final String PERSISTENT_USER_ID_NAME = "UserID";
 	private static final String FORM_USERID_NAME = "userId";
 	private static final String FORM_PASSWORD_NAME = "password";
 	private static final String KERBEROS_REALM = "IC.AC.UK";
@@ -40,8 +41,7 @@ public class MusicKerberos extends KerberosAuth {
 	private static final String AUTH_BASE = "/WEB-INF/conf/";
 	private static final String LOGIN_CONF = AUTH_BASE + "jaas.conf";
 	private static final String KRB5_CONF = AUTH_BASE + "krb5.conf";
-	private static final String AUTH_ATTRIBUTE = "CloudMusicAuth";
-	
+	private static final String AUTH_ATTRIBUTE = "CloudMusicAuth";	
 	
 	private HttpSession session;
 	private HttpServletRequest request;
@@ -94,6 +94,7 @@ public class MusicKerberos extends KerberosAuth {
 	@Override
 	protected void destroyPersistentSubject() {
 		session.removeAttribute(PERSISTENT_NAME);
+		session.removeAttribute(PERSISTENT_USER_ID_NAME);
 	}
 
 	/* (non-Javadoc)
@@ -118,14 +119,14 @@ public class MusicKerberos extends KerberosAuth {
 	 * @return The College User ID of the user that has been authenticated. If the user has not been authenticated, returns null
 	 */
 	public String getUserId(){
-		final String attributeName = "UserID";
+		
 		Subject subject = getSubject();
 		if (subject == null)
 			return null;
 		
 		// Check to see if we have stored the User ID already
 		
-		Object cache = session.getAttribute(attributeName);
+		Object cache = session.getAttribute(PERSISTENT_USER_ID_NAME);
 		if (cache instanceof String){
 			return (String) cache;
 		}
@@ -141,7 +142,7 @@ public class MusicKerberos extends KerberosAuth {
 			}
 		}
 		userId = userId.toLowerCase();
-		session.setAttribute(attributeName, userId);
+		session.setAttribute(PERSISTENT_USER_ID_NAME, userId);
 		return userId;
 	}
 	
