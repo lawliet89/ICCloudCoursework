@@ -1,0 +1,402 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{pdflscape}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+\noindent
+Distributed Systems Coursework Report
+\end_layout
+
+\begin_layout Author
+Yong Wen Chua (ywc110)
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Setup and Requirements
+\end_layout
+
+\begin_layout Standard
+The source code for the entire project, including its history, can be found
+ in a Git repository at 
+\begin_inset CommandInset href
+LatexCommand href
+name "Github"
+target "https://github.com/lawliet89/ICCloudCoursework.git"
+
+\end_inset
+
+.
+ This section will first describe the repository structure along with some
+ instructions on how to deploy and run the servlet on a Tomcat server.
+\end_layout
+
+\begin_layout Subsection
+Directory Layout
+\end_layout
+
+\begin_layout Itemize
+res/ -- Contains the various template for configuration files to running
+ the servlet.
+ Includes samples of files that require private personal credentials.
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+jaas.conf -- The file required for Java to perform Kerberos Configuration.
+ There is usually no need to touch this file.
+ Goes in ROOT/WEB-INF/conf
+\end_layout
+
+\begin_layout Itemize
+jets3t.properties -- The end point for the S3 service.
+ Goes in ROOT/WEB-INF/properties
+\end_layout
+
+\begin_layout Itemize
+krb5.conf -- Contains the necessary Kerberos configuration.
+ This is setup to use Imperial Kerberos.
+ Goes in ROOT/WEB-INF/conf
+\end_layout
+
+\begin_layout Itemize
+mime.types -- MIME types definition for libraries.
+ Goes in ROOT/WEB-INF/properties
+\end_layout
+
+\begin_layout Itemize
+queries.sql -- The initial SQL queries to create the necessary tables.
+\end_layout
+
+\begin_layout Itemize
+s3credentials.properties.sample -- The S3 access keys.
+ There is no pre-configured file.
+ You need to create your own.
+ Goes in ROOT/WEB-INF/properties/s3credentials.properties
+\end_layout
+
+\begin_layout Itemize
+server.xml -- Your server.xml configuration for Tomcat.
+ This is an example set to run by default on HTTPS port 48953.
+ If you decide otherwise, 
+\series bold
+you need to edit the Java source code and recompile the client.jar file.
+\end_layout
+
+\begin_layout Itemize
+sql.conf.sample -- A sample for the Postgresql Server credentials.
+ Goes in ROOT/WEB-INF/CONF/sql.conf
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+ROOT/ -- All the stuff that goes inside your webapps folder on Tomcat.
+ Contains static web resources.
+ Files of particular interest are described below.
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+WEB-INF/lib/client.jar - The compiled source code in a JAR
+\end_layout
+
+\begin_layout Itemize
+WEB-INF/lib/servlet-api-2.5.jar - The JAR file for Eclipse to reference.
+ Do not include this in your Tomcat deployment.
+\end_layout
+
+\begin_layout Itemize
+WEB-INF/properties & WEB-INF/conf -- Configuration
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+src/ -- Source code.
+\end_layout
+
+\begin_layout Subsection
+Requirements
+\end_layout
+
+\begin_layout Standard
+The code has been tested to run on Tomcat 6 under Java runtime 1.6.
+ The Tomcat server has to be configured to use port 48953 for HTTPS access.
+ This means that you have to configure Tomcat to run HTTPS using a certificate.
+ This certificate can be self-signed.
+ If you decide to use another port, edit the integer 
+\begin_inset Quotes eld
+\end_inset
+
+net.acperience.cloudplayer.MusicUtility.SECURE_PORT
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsection
+Setup
+\end_layout
+
+\begin_layout Enumerate
+Create a Tomcat context that users port 48953 for HTTPS access.
+ Configure Tomcat accordingly with the certificate.
+ See res/server.xml for an example.
+ If you decide to use another port, edit the integer 
+\begin_inset Quotes eld
+\end_inset
+
+net.acperience.cloudplayer.MusicUtility.SECURE_PORT
+\begin_inset Quotes erd
+\end_inset
+
+ in the source code and recreate a ROOT/WEB-INF/lib/client.jar file with
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+net.acperience.cloudmusic
+\begin_inset Quotes erd
+\end_inset
+
+ package.
+\end_layout
+
+\begin_layout Enumerate
+Copy ROOT/ to the webapps folder of your Tomcat deployment.
+\end_layout
+
+\begin_layout Enumerate
+Configure ROOT/WEB-INF/conf/sql.conf according to the sample res/sql.conf.sample
+\end_layout
+
+\begin_layout Enumerate
+Configure ROOT/WEB-INF/properties/s3Credentials.properties according to the
+ sample res/s3credentials.properties.sample
+\end_layout
+
+\begin_layout Enumerate
+Create the necessary tables in your database according to res/queries.sql
+\end_layout
+
+\begin_layout Enumerate
+Run Tomcat.
+\end_layout
+
+\begin_layout Subsection
+Additional Changes
+\end_layout
+
+\begin_layout Standard
+Some of the properties are hard coded into the Java Source files.
+ Look through the top of each class to see what is available.
+ Should you wish to change them, you need to recompile the JAR file in ROOT/WEB-
+INF/lib/client.jar.
+ Export the 
+\begin_inset Quotes eld
+\end_inset
+
+net.acperience.cloudplayer
+\begin_inset Quotes erd
+\end_inset
+
+ package.
+\end_layout
+
+\begin_layout Standard
+Additional configuration options are also available, but not necessary.
+ See the conf or properties directory under WEB-INF.
+\end_layout
+
+\begin_layout Section
+Package Description
+\end_layout
+
+\begin_layout Standard
+The package 
+\begin_inset Quotes eld
+\end_inset
+
+net.acperience.cloudmusic
+\begin_inset Quotes erd
+\end_inset
+
+ package containts the following classes:
+\end_layout
+
+\begin_layout Itemize
+DbManager: This class handles the database queries to the Postgresql database.
+ It creates and retain a single instance of the DbManager class throughout
+ the whole lifetime of the Tomcat context.
+ 
+\end_layout
+
+\begin_layout Itemize
+FileManager: This class handles the file operations related to the music
+ files.
+ It manages the cache and returns the necessary paths and URLs for the client
+ to use.
+\end_layout
+
+\begin_layout Itemize
+KerberosAuth: A generic class to handle authentication via Kerberos.
+ The implementation specific to this application is implemented in MusicKerberos.
+\end_layout
+
+\begin_layout Itemize
+MusicKerberos: The class that handles authentication for the user.
+ Also handles the user specific data including the user's buckets.Stores
+ authenticated users in HTTP Sessions.
+\end_layout
+
+\begin_layout Itemize
+MusicUtility: Static utility class that contains convenience methods.
+ Including the parsing of simple template files to output to HTML.
+\end_layout
+
+\begin_layout Itemize
+ServletAuth: Servlet that handles authentication for user.
+\end_layout
+
+\begin_layout Itemize
+ServletJSON: Servlet that handles client data requests via AJAX and returns
+ them in JSON format.
+\end_layout
+
+\begin_layout Itemize
+ServletMain: Servlet that outputs the main interface.
+\end_layout
+
+\begin_layout Itemize
+ServletStream: Servlet to output user requested music files.
+\end_layout
+
+\begin_layout Itemize
+ServletUpload: Servlet that handles file uploads.
+\end_layout
+
+\begin_layout Standard
+A class diagram is available at the end of the document.
+ You can also refer to the Javadoc in res/report/doc for details of the
+ class methods.
+\end_layout
+
+\begin_layout Section
+Application Operation
+\end_layout
+
+\begin_layout Standard
+Users are authenticated via the Kerberos protocol.
+ Currently, the application can only handle users from one domain.
+ Users with the same ID from multiple domains will cause trouble.
+ Each user is allocated one bucket where all the files are stored.
+ All the files must have a unique key.
+ The key is generated by using the song's artist, title and album.
+ If a new file with the same combination is uploaded, the old file will
+ be removed and overwritten with the new file.
+\end_layout
+
+\begin_layout Standard
+User playlists and songs are stored locally on a database.
+ This is to expedite the process without having to requery the S3 server
+ every time.
+ A local cache is employed to store the music files locally to reduce the
+ number of requests to the S3 server.
+ The cache is currently not cleared automatically.
+ 
+\end_layout
+
+\begin_layout Standard
+All output sent to the client are handled by the servlets.
+ The backend operation are handled by the other classes.
+ Only ServletMain and ServletAuth serve HTML content.
+ ServletMain will provide the code to run a dynamic HTML5 client on the
+ user's browser.
+ ServletAuth handles the HTML output to allow user login and handles the
+ HTTP POST for login.
+ It will then send a redirect to ServletMain when authentication is coimplete.
+ 
+\end_layout
+
+\begin_layout Standard
+ServletJSON will output the necessary JSON output that will be requested
+ from the client code provided by ServletMain.
+ ServletUpload handles the HTTP POST request sent by the upload operation
+ of the client code provided by ServletMain.
+ Finally, ServletStream will provide the necessary binary data for streaming
+ of the music files.
+ All other operations are provided by ServletJSON.
+\end_layout
+
+\end_body
+\end_document

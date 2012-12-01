@@ -1,23 +1,5 @@
-/*
-	This was a pain in the a@@ to implement.
-	The default kerberos configuration is found on linux machines in DoC at /etc/krb5.conf
-	The realm to use is IC.AC.UK. The KDCs can be found by running dig -t SRV _kerberos._tcp.ic.ac.uk
-	
-	Everything else is pretty much: just follow the tutorial!
-	
-	References: http://www.bsg.co.za/web/guest/software_solutions_technical_solution_showcase_java_kerberos
-	
-	Implement the abstract methods described
-	 	- getPersistentSubject: Used to see if a subject has been authenticated
-	 	- storePersistentSubject: Used to store a persistent subject upon successful login
-	 	- destroyPersistentSubject: Destroy a persistent subject upon logout
-	 	- getUsername: Used to get a username for authentication
-	 	- getPassword: Used to get a password for authentication
-	 	
-	 After constructing the object, to populate the necessary fields, call authenticate()
- */
-
 package net.acperience.cloudplayer;
+
 
 import java.io.IOException;
 
@@ -25,6 +7,25 @@ import javax.security.auth.*;
 import javax.security.auth.login.*;
 import javax.security.auth.callback.*;
 
+/**
+ *	The default kerberos configuration is found on linux machines in DoC at /etc/krb5.conf <br />
+ *	The realm to use is IC.AC.UK. The KDCs can be found by running dig -t SRV _kerberos._tcp.ic.ac.uk<br /><br />
+ *	
+ *	Everything else is pretty much: just follow the tutorial!<br /><br />
+ *	
+ *	References: http://www.bsg.co.za/web/guest/software_solutions_technical_solution_showcase_java_kerberos<br /><br />
+ *	
+ *	Implement the abstract methods described<ul>
+ *	<li>getPersistentSubject: Used to see if a subject has been authenticated</li>
+ *	<li>storePersistentSubject: Used to store a persistent subject upon successful login</li>
+ *	<li>destroyPersistentSubject: Destroy a persistent subject upon logout</li>
+ *	<li>getUsername: Used to get a username for authentication</li>
+ *	<li>getPassword: Used to get a password for authentication</li></ul>
+ *	 	
+ *	 After constructing the object, to populate the necessary fields, call authenticate()
+ * @author Lawliet
+ *
+ */
 public abstract class KerberosAuth implements CallbackHandler{
 		
 	protected String name;		// The name of the authentication "rule"/module to use
