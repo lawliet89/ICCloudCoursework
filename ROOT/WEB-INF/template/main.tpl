@@ -34,8 +34,8 @@
     }
     #playlistUl li span.playlistEditable{
         display: inline-block;
-        width: 90%;
-        max-width:90%;
+        width: 80%;
+        max-width:80%;
         overflow:hidden;
     }
     
@@ -160,6 +160,10 @@
             </div>
         </form>
         <!-- End Upload -->
+        
+        <div class="five columns">
+            <p style="color: #555; font-size: 85%">Tip: Drag and drop songs from the player to the list of playlists to add songs to playlists.</p>
+        </div>
     </div>
     
 

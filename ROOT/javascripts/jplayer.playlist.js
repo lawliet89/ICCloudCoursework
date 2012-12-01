@@ -225,6 +225,7 @@
 			// Create remove control
             // Access Custom data via http://stackoverflow.com/questions/7423753/access-custom-attributes-via-jquery
 			// listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "' data-itemId='" + media.id + "' data-playlistId='" + PlaylistManager.currentPlaylist + "'>&times;</a>";
+            
             listItem += "<a href='javascript:;' class='" + this.options.playlistOptions.removeItemClass + "' data-itemId='" + media.id + "' data-playlistId='" + PlaylistManager.currentPlaylist + "'><img src='/images/"
                 + (PlaylistManager.currentPlaylist == 0 ? "delete.png" : "page_delete.png")
                 + "' /></a>";

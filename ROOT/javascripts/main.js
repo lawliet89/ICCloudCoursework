@@ -116,6 +116,7 @@ var PlaylistManager = {
                          + value.playlistId + '" class="playlistEditable" data-playlistId="' + value.playlistId + '" '
                          + 'onclick="PlaylistManager.loadPlaylist(' + value.playlistId + ');"'
                          + '>' + value.playlistName + '</span>'
+                         + "<img src='/images/page_white_edit.png' title='Rename Playlist' onclick='$(\"#playlist-"+value.playlistId + "\").trigger(\"dblclick\");return false;' class='delete-button' style='margin-left: 5px;'> "
                          + '<img src="/images/delete.png" onclick="PlaylistManager.deletePlaylist(' + value.playlistId + ');" class="delete-button" title="Delete playlist" />'
                          + '</li>';
                 });

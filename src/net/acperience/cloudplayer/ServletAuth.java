@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sourceforge.jtpl.Jtpl;
+
 public class ServletAuth extends HttpServlet{
 		
 	public ServletAuth(){
@@ -31,8 +33,10 @@ public class ServletAuth extends HttpServlet{
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
     	
+    	response.setContentType("text/html;charset=UTF-8");
     	response.setCharacterEncoding("UTF-8");
     	PrintWriter out = response.getWriter();
+    	Jtpl body = MusicUtility.createBodyTpl(this, MusicUtility.TPL_DIR + "login.tpl");
 	    try{	
 	    	// IMPORTANT - Check we are on HTTPS
 	    	if (!request.isSecure()){
@@ -47,17 +51,17 @@ public class ServletAuth extends HttpServlet{
 	    	if (isUserAuthenticated(request)){
 	    		response.sendRedirect("/");
 	    	}
+	    	body.assign("message", "");
 	    } catch (LoginException e) {
-			e.printStackTrace(out);
+	    	body.assign("message", "We could not contact the authentication server. Please try again later.");
 		} catch (SecurityException e) {
-			e.printStackTrace(out);
+			body.assign("message", "There was an unexpected error. Please try again later.");
 		}
 	    finally{
-	    	// Output Login
-    		String output = MusicUtility.outputPage(this, "Login", MusicUtility.TPL_DIR + "login.tpl");
-    		response.setContentType("text/html;charset=UTF-8");
-    		out.print(output);
-	    	out.close();
+	    	// Print the page
+	    	
+			body.parse("Body");
+			out.print(MusicUtility.outputPage(this, "Login", body));
 	    }
     }
 
@@ -72,8 +76,10 @@ public class ServletAuth extends HttpServlet{
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException
     {
+    	response.setContentType("text/html;charset=UTF-8");
     	response.setCharacterEncoding("UTF-8");
     	PrintWriter out = response.getWriter();
+    	Jtpl body = MusicUtility.createBodyTpl(this, MusicUtility.TPL_DIR + "login.tpl");
 	    try{	
 	    	// IMPORTANT - Check we are on HTTPS
 	    	if (!request.isSecure()){
@@ -95,16 +101,14 @@ public class ServletAuth extends HttpServlet{
 	    		}
 	    	}
 	    } catch (LoginException e) {
-			e.printStackTrace(out);
+			body.assign("message", "Login failed. Perhaps you provided the wrong credentials?");
 		} catch (SecurityException e) {
-			e.printStackTrace(out);
+			body.assign("message", "Login failed. There was an unexpected error. Please try again later.");
 		}
 	    finally{
 	    	// Output Login
-    		String output = MusicUtility.outputPage(this, "Login", MusicUtility.TPL_DIR + "login.tpl");
-    		response.setContentType("text/html;charset=UTF-8");
-    		out.print(output);
-	    	out.close();
+	    	body.parse("Body");
+			out.print(MusicUtility.outputPage(this, "Login", body));
 	    }
     }
     

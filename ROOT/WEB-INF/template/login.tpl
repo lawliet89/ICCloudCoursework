@@ -2,7 +2,7 @@
 <div class="ten columns">
     <h1>Login</h1>
     Please login with your college user name and password.
-    <!-- {message} -->
+    <p style="color:red;">{message}</p>
    <form action="/auth" method="POST">
     <div class="row">
         <div class="four columns alpha">User ID</div>
