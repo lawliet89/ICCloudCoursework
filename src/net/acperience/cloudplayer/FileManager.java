@@ -240,15 +240,22 @@ public class FileManager {
 						AudioFile meta = null;
 						// Read metadata
 						meta = AudioFileIO.read(file);
+						Tag tag = meta.getTag();
+						// Let's build a new key
+						String key = getKey(tag.getFirst(FieldKey.ARTIST), 
+								tag.getFirst(FieldKey.ALBUM), 
+								tag.getFirst(FieldKey.TITLE), 
+								meta.getAudioHeader().getEncodingType());
 						
 						jsonCurrent.element("format", meta.getAudioHeader().getFormat());
-						//TODO Restrict to mp3, oga, m4a, wav, aac
+						// We are going to try and see if we can get the MIME type of the file. 
+						// If not, we are going to throw an unsupported error message
+						jsonCurrent.element("mime", getMime(key));
 						
 						//jsonCurrent.element("encoding",meta.getAudioHeader().getEncodingType());
 						jsonCurrent.element("duration", meta.getAudioHeader().getTrackLength());
 						
 						// See http://www.jthink.net/jaudiotagger/examples_read.jsp
-						Tag tag = meta.getTag();
 						jsonCurrent.element("artist", tag.getFirst(FieldKey.ARTIST));
 						jsonCurrent.element("album", tag.getFirst(FieldKey.ALBUM));
 						jsonCurrent.element("title", tag.getFirst(FieldKey.TITLE));
@@ -257,14 +264,6 @@ public class FileManager {
 						
 						jsonCurrent.element("success", true);
 						
-						// Now let's do S3 Processing
-						// Let's build a new key
-						String key = getKey(tag.getFirst(FieldKey.ARTIST), 
-								tag.getFirst(FieldKey.ALBUM), 
-								tag.getFirst(FieldKey.TITLE), 
-								meta.getAudioHeader().getEncodingType());
-						
-
 						// Now we are going to insert a new entry into the database first
 						
 						db = DbManager.getInstance(context);
@@ -303,6 +302,11 @@ public class FileManager {
 						jsonCurrent.element("key",key);
 						jsonCurrent.element("success", true);
 						
+					} catch (IllegalArgumentException e){
+						jsonCurrent.element("success", false);
+						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
+						jsonCurrent.element("errorFriendly", "Unsupported file format.");
+						file.delete();
 					} catch (CannotReadException e) {		// Reading meta data from uploaded file
 						jsonCurrent.element("success", false);
 						jsonCurrent.element("exception", ExceptionUtils.getStackTrace(e));
@@ -681,15 +685,14 @@ public class FileManager {
 	 * @param key
 	 * @return
 	 */
-	public static String getJPlayerAttributeName(String key){
+	public static String getJPlayerAttributeName(String key) throws IllegalArgumentException{
 		// Get extension of key
 		String extension = FilenameUtils.getExtension(key).toLowerCase();
 		try{
 			return JPlayerMapping.valueOf(extension).getExtension();
 		}
 		catch(IllegalArgumentException e){
-			// Just do a fake MP3 for now
-			return "mp3";
+			throw e;
 		}
 	}
 	
@@ -698,15 +701,14 @@ public class FileManager {
 	 * @param key
 	 * @return
 	 */
-	public static String getMime(String key){
+	public static String getMime(String key) throws IllegalArgumentException{
 		// Get extension of key
 		String extension = FilenameUtils.getExtension(key).toLowerCase();
 		try{
 			return JPlayerMapping.valueOf(extension).getMime();
 		}
 		catch(IllegalArgumentException e){
-			// Just do a fake MP3 for now
-			return "audio/mpeg";
+			throw e;
 		}
 	}
 		
