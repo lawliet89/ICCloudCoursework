@@ -77,15 +77,27 @@ public class FileManager {
 			this.mime = mime;
 		}
 		
+		/**
+		 * @return The extension for a given file format.
+		 */
 		public String getExtension(){
 			return this.extension;
 		}
 		
+		/**
+		 * @return The MIME type for a given file format.
+		 */
 		public String getMime(){
 			return this.mime;
 		}
 	}
 	
+	/**
+	 * Creates an instance of a file manager. Each FileManager should be instantiated with each Servlet instance.
+	 * @param context The HttpServlet creating the FileManager. This is used for path purposes.
+	 * @throws S3ServiceException
+	 * @throws IOException
+	 */
 	public FileManager(HttpServlet context) throws S3ServiceException, IOException{
 		this.context = context;
 		
@@ -104,12 +116,12 @@ public class FileManager {
 	}
 	
 	/**
-	 * Get an S3Object from the server. WARNING: An InputStream will be created and should be closed
+	 * Get an S3Object from the server. 
 	 * Or risk server connection starvation
 	 * @param key
 	 * @param user
-	 * @param getData 
-	 * @return
+	 * @param getData Set to true to create an InputStream <strong>WARNING: An InputStream will be created and should be closed</strong>
+	 * @return S3Object 
 	 * @throws S3ServiceException 
 	 */
 	@SuppressWarnings("deprecation")
@@ -122,10 +134,10 @@ public class FileManager {
 	}
 	
 	/**
-	 * Gets an S3Object without the data
+	 * Creates an S3Object without an accompanying data InputStream instance
 	 * @param key
 	 * @param user
-	 * @return
+	 * @return An S3Object
 	 * @throws S3ServiceException
 	 */
 	public S3Object getS3Object(String key, MusicKerberos user) throws S3ServiceException{
@@ -137,11 +149,11 @@ public class FileManager {
 	 * Gets a file object to a file. This will be a cached copy on the server
 	 * @param key
 	 * @param user
-	 * @return
+	 * @return A File object pointing to the cached copy on the server.
 	 * @throws ServiceException 
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
-	 * @throws NoSuchAlgorithmException 
+	 * @throws NoSuchAlgorithmException Thrown if the MD5 hashing algorithm is not supported.
 	 */
 	public File getFile(String key, MusicKerberos user) 
 			throws NoSuchAlgorithmException, FileNotFoundException, IOException, ServiceException {
@@ -186,7 +198,7 @@ public class FileManager {
 	}
 	
 	/**
-	 * Handles the upload in a HTTP POST Requwst
+	 * Handles the upload in a HTTP POST Request
 	 * 
 	 * 
 	 * @param request

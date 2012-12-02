@@ -10,6 +10,11 @@ import net.sourceforge.jtpl.Jtpl;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 
+/**
+ * Outputs the HTML client to the user's browser.
+ * @author Lawliet
+ *
+ */
 public class ServletMain extends HttpServlet {
 	private static final long serialVersionUID = -1418564285836413358L;
 	public static final String TAG = "ServletMain";
@@ -88,7 +93,6 @@ public class ServletMain extends HttpServlet {
 			}
 			user.setS3Service(s3Service);
 			user.setResponse(response);		// Debugging purposes
-			user.setupUser();
 			
 			// Print the page
 			Jtpl body = MusicUtility.createBodyTpl(this, MusicUtility.TPL_DIR + "main.tpl");
@@ -101,9 +105,7 @@ public class ServletMain extends HttpServlet {
 			e.printStackTrace(out);
 		} catch (SecurityException e) {
 			e.printStackTrace(out);
-		} catch (S3ServiceException e){
-			e.printStackTrace(out);
-		}
+		} 
     	finally{
     		out.close();
     	}

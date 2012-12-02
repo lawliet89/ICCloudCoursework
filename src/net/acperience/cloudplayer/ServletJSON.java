@@ -15,6 +15,12 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 
+/**
+ * Servlet that provides the JSON data requested by the HTML client provided by {@linkplain ServletMain}. 
+ * Also performs some operations. 
+ * @author Lawliet
+ *
+ */
 public class ServletJSON extends HttpServlet {
 	private static final long serialVersionUID = 4450837983686054190L;
 
@@ -66,7 +72,6 @@ public class ServletJSON extends HttpServlet {
 			}
 			user.setS3Service(s3Service);
 			user.setResponse(response);		// Debugging purposes
-			user.setupUser();
 			
 			/*
 			 * Time to handle

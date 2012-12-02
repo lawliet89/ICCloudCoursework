@@ -14,6 +14,11 @@ import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.FileUploadException;
 import org.jets3t.service.S3ServiceException;
 
+/**
+ * Handles upload of music files.
+ * @author Lawliet
+ *
+ */
 public class ServletUpload extends HttpServlet {
 
 	private static final long serialVersionUID = -7552635585810140780L;

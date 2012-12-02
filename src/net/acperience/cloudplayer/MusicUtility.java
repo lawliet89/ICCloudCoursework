@@ -16,8 +16,10 @@ import org.jets3t.service.*;
 import org.jets3t.service.impl.rest.httpclient.*;
 import org.jets3t.service.security.AWSCredentials;
 
-/*
- * Utility classes
+/**
+ * Utility class providing convenience methods.
+ * @author Lawliet
+ *
  */
 public final class MusicUtility {
     public static final String S3_ACCESS_KEY_PROPERTY_NAME = "s3AccessKey";
@@ -35,7 +37,13 @@ public final class MusicUtility {
     	// Cannot be instantiated.
     }
     
-    // Create a new credentials object based on values from the property file
+    /**
+     * Creates an AWSCredentials object based on the contents of an Input Property file. The fields should be named according to 
+     * {@linkplain #S3_ACCESS_KEY_PROPERTY_NAME} and {@linkplain #S3_SECRET_KEY_PROPERTY_NAME}.
+     * @param propertyFile File containing the properties necessary for creating an AWSCredentials object.
+     * @return AWSCredentials object based on provided details.
+     * @throws IOException
+     */
 	public static AWSCredentials getCredentials(InputStream propertyFile) throws IOException{
 		Properties properties = new Properties();
 		properties.load(propertyFile);
@@ -44,7 +52,15 @@ public final class MusicUtility {
 		return new AWSCredentials(properties.getProperty(S3_ACCESS_KEY_PROPERTY_NAME),properties.getProperty(S3_SECRET_KEY_PROPERTY_NAME));	
 	}
 	
-	// Connect to S3. Returns RestS3Service object
+	/**
+	 * Create a connection to the S3 service based on provided credentials. You can change the S3 endpoint settings in an InputStream file.
+	 * 
+	 * @param credentials Use {@linkplain #getCredentials(InputStream)} to create the object.
+	 * @param s3Properties The settings to connect to S3.
+	 * @return
+	 * @throws S3ServiceException
+	 * @throws IOException
+	 */
 	public static RestS3Service connect(AWSCredentials credentials, InputStream s3Properties) 
 			throws S3ServiceException, IOException {
 		Jets3tProperties property = new Jets3tProperties();
@@ -53,21 +69,41 @@ public final class MusicUtility {
 		return new RestS3Service(credentials, null, null, property);
 	}
 	
+	/**
+	 * Convenience method to provide an InputStream to an input file to create a <code>AWSCredentials</code> object automatically.<br /><br/>
+	 * @param propertyFile
+	 * @param s3Properties
+	 * @return
+	 * @throws IOException
+	 * @throws S3ServiceException
+	 * @see {@linkplain #connect(AWSCredentials, InputStream)}
+	 */
 	public static RestS3Service connect(InputStream propertyFile, InputStream s3Properties) throws IOException, S3ServiceException{
 		return connect(getCredentials(propertyFile), s3Properties);
 	}
 	
-	// Output page based on template
-	
-	// Convenience function to provide only the body path
-	// In this case, the body block has to be called Body
+	/** Output page based on template. Convenience function to provide only the body path. In this case, the body block has to be called Body
+	 * 
+	 * @param context
+	 * @param title
+	 * @param body
+	 * @return
+	 * @throws IOException
+	 */
 	public static String outputPage(HttpServlet context, String title, String body) throws IOException{
 		Jtpl bodyTpl = createBodyTpl(context, body);
 		bodyTpl.parse("Body");
 		return outputPage(context, title, bodyTpl);
 	}
 	
-	// Provide the parsed body
+	/**
+	 * Output page based on template. Provide a parsed Body object.
+	 * @param context
+	 * @param title
+	 * @param body
+	 * @return
+	 * @throws IOException
+	 */
 	public static String outputPage(HttpServlet context, String title, Jtpl body) throws IOException{
 		Jtpl header = new Jtpl(context.getServletContext().getRealPath(TPL_HEADER));
 		header.assign("pageTitle", title);
@@ -78,7 +114,15 @@ public final class MusicUtility {
 		return outputPage(context, body, header,footer);
 	}
 	
-	// Everything under control
+	/**
+	 * Output page based on template. Remember to parse all the objects.
+	 * @param context
+	 * @param body
+	 * @param header
+	 * @param footer
+	 * @return
+	 * @throws IOException
+	 */
 	public static String outputPage(HttpServlet context, Jtpl body, Jtpl header, Jtpl footer) throws IOException{
 		StringBuilder output = new StringBuilder();
 		output.append(header.out());
@@ -88,7 +132,13 @@ public final class MusicUtility {
 		return output.toString();
 	}
 	
-	// Get Body TPL object
+	/**
+	 * Convenience method to create a JTpl object based on a relative path.
+	 * @param context
+	 * @param path Relative path
+	 * @return
+	 * @throws IOException
+	 */
 	public static Jtpl createBodyTpl(HttpServlet context, String path) throws IOException{
 		return new Jtpl(context.getServletContext().getRealPath(path));
 	}

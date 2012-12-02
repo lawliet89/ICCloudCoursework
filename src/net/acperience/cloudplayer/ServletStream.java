@@ -21,6 +21,11 @@ import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
 import org.jets3t.service.model.S3Object;
 
+/**
+ * Handles the streaming of music files.
+ * @author Lawliet
+ *
+ */
 public class ServletStream extends HttpServlet {
 	private static final long serialVersionUID = 1969251208091469532L;
 	private S3Service s3Service;

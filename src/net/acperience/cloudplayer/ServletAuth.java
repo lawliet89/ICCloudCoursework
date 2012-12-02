@@ -11,6 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sourceforge.jtpl.Jtpl;
 
+/**
+ * Servlet that handles the authentication of the user.
+ * @author Lawliet
+ *
+ */
 public class ServletAuth extends HttpServlet{
 		
 	public ServletAuth(){

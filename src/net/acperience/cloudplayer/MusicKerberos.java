@@ -17,16 +17,17 @@ import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.model.S3Bucket;
 
 /**
- * 
- * Kerberos Authentication implementation using a serialised version of the Subject as the persistent storage
- * Used in a servlet environment. 
+ * An implementation of {@link KerberosAuth} specific to this application.
+ * <br /><br />
+ * Persistent storage of authenticated user is accomplished by storing a serialized version of the authenticated Subject in the HttpSession.
  * One instance of the class is instantiated with each HTTP request and should be destroyed upon the completion
  * of that HTTP request.
  * 
- * Otherwise, you might get LEAKS on two fronts: the HttpServletRequest object and the MusicKerberos object
- * 
- * This also encapsulates the user related operations in this application
- * 
+ * <br /><br />
+ * The default Kerberos configuration is found on linux machines in DoC at /etc/krb5.conf <br />
+ * The realm to use is IC.AC.UK. The KDCs can be found by running dig -t SRV _kerberos._tcp.ic.ac.uk<br /><br />
+ * <br /><br />
+ * Use the factory method {@linkplain #createLoginContext()} to get an instance of the class.
  * @author Lawliet
  *
  */
@@ -50,14 +51,24 @@ public class MusicKerberos extends KerberosAuth {
 	private S3Service s3Service;
 	
 	/**
-	 * Set S3Service
+	 * Set S3Service to be used.
 	 * @param s3Service the s3Service to set
 	 */
 	public void setS3Service(S3Service s3Service) {
 		this.s3Service = s3Service;
 	}
-
-	public MusicKerberos(String name, String authLoginConfig, String krb5Config, HttpServletRequest request)
+	
+	
+	/**
+	 * Provides the necessary configuration for instantiating the class.
+	 * @param name Name of LoginMoudle to use.
+	 * @param authLoginConfig Path to a JAAS configuration file
+	 * @param krb5Config Path to a Kerberos Authentication file
+	 * @param request The HTTP Request object to obtain HttpSession information.
+	 * @throws LoginException
+	 * @throws SecurityException
+	 */
+	private MusicKerberos(String name, String authLoginConfig, String krb5Config, HttpServletRequest request)
 			throws LoginException, SecurityException {
 		// Call super to initialise
 		super(name, authLoginConfig, krb5Config);
@@ -69,7 +80,7 @@ public class MusicKerberos extends KerberosAuth {
 	 * @see net.acperience.cloudplayer.KerberosAuth#getPersistentSubject()
 	 */
 	@Override
-	public Subject getPersistentSubject() {
+	protected Subject getPersistentSubject() {
 		// See if we can get a subject from the HttpSession
 		Object persistent = session.getAttribute(PERSISTENT_NAME);
 		if (persistent == null)
@@ -101,7 +112,7 @@ public class MusicKerberos extends KerberosAuth {
 	 * @see net.acperience.cloudplayer.KerberosAuth#getUsername()
 	 */
 	@Override
-	public String getUsername() {
+	protected String getUsername() {
 		
 		return request.getParameter(FORM_USERID_NAME);
 	}
@@ -110,7 +121,7 @@ public class MusicKerberos extends KerberosAuth {
 	 * @see net.acperience.cloudplayer.KerberosAuth#getPassword()
 	 */
 	@Override
-	public String getPassword() {
+	protected String getPassword() {
 		return request.getParameter(FORM_PASSWORD_NAME);
 	}
 	
@@ -170,8 +181,7 @@ public class MusicKerberos extends KerberosAuth {
 	}
 	
 	/**
-	 * Returns the user's bucket. If it does not exist, attempts to create.
-	 * @return
+	 * @return Returns the user's bucket. If it does not exist, attempts to create.
 	 */
 	public S3Bucket getUserBucket() throws S3ServiceException{
 		if (bucket != null)
@@ -182,43 +192,7 @@ public class MusicKerberos extends KerberosAuth {
 		bucket = s3Service.getOrCreateBucket(name);
 		return bucket;
 	}
-	
-	/**
-	 * Put a boolean value into the session
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	public void putSessionBoolean(String name, boolean value){
-		session.setAttribute(name, value);
-	}
-
-	
-	/**
-	 * Get a Boolean object from session. Returns NULL if it doesn't exist
-	 * @param name
-	 * @return Boolean object stored in session, or NULL if non existent
-	 */
-	
-	public Boolean getSessionBoolean(String name){
-		Object result = session.getAttribute(name);
-		if (result instanceof Boolean)
-			return (Boolean) result;
 		
-		return null;
-	}
-	
-	/**
-	 * Check and sets up user's buckets and necessary files
-	 * 
-	 */
-	public void setupUser() throws S3ServiceException{
-		//if (getSessionBoolean("s3Setup") != null)
-		//		return;
-		// Get User Bucket - Create if necessary
-		// S3Bucket bucket = getUserBucket();
-		
-	}
 
 	/**
 	 * Sets response object
@@ -241,24 +215,12 @@ public class MusicKerberos extends KerberosAuth {
 		
 	}
 
-/*	@Override
-	public void authenticate(boolean login) throws LoginException{
-		super.authenticate(login);
-		if (getSubject() != null)
-				setupUser();
-	}
-	
-	@Override
-	public void authenticate() throws LoginException{
-		authenticate(true);
-	}*/
-
 	/**
 	 * Creates a MusicKeberos object to get authenticated user data based on the HttpRequest
 	 * 
 	 * @param request Request to contain the necessary user context information
 	 * @param context The HttpServlet calling the method
-	 * @return The object
+	 * @return An instantiated object specific to the HTTP Request
 	 * @throws LoginException
 	 * @throws SecurityException
 	 */

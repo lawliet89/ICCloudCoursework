@@ -7,8 +7,10 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServlet;
 
-/*
- *	One instance of DbManager should be shared across all the servlets
+/**
+ * A singleton database manager that handles operations with the database. Only one instance is ever created across all servlets.
+ * @author Lawliet
+ *
  */
 public class DbManager {
 	public static final String DRIVER_CLASS = "org.postgresql.Driver";
@@ -55,7 +57,6 @@ public class DbManager {
 	private PreparedStatement addItemToPlaylistStatement = null;
 	private static final String addItemToPlaylistSQL = "INSERT INTO Cloud_playlistItem VALUES(?,?);";
 	
-	// Create a connection and populate prepared statements for performance reasons
 	private DbManager(String uri, String user, String pass) throws SQLException{
 		connection = DriverManager.getConnection(uri,user,pass);
 		// Items Related
@@ -82,12 +83,13 @@ public class DbManager {
 	/**
 	 * Insert an item into the table. 
 	 * If item with the key (i.e. same artist + title + album combination) exists, will return item
-	 * @param userId
-	 * @param itemTitle
-	 * @param itemArtist
-	 * @param itemAlbum
-	 * @param itemYear
-	 * @param itemKey
+	 * @param userId UserID of the user.
+	 * @param itemTitle Song title
+	 * @param itemArtist Song artist
+	 * @param itemAlbum Song album
+	 * @param itemYear Song year
+	 * @param itemKey Song file name
+	 * @param itemDuration Song duration, in seconds.
 	 * @return The ItemId of the new row created
 	 * @throws SQLException 
 	 */
@@ -117,7 +119,9 @@ public class DbManager {
 	
 	/**
 	 * Gets the results for an item based on the key
-	 * @return
+	 * @param itemKey Item key, i.e. filename
+	 * @param userId The Use ID String
+	 * @return A ResultSet of the results returned
 	 * @throws SQLException
 	 */
 	public ResultSet getItemByKey(String itemKey, String userId) throws SQLException{
@@ -129,9 +133,9 @@ public class DbManager {
 	
 	/**
 	 * Returns item details via ID
-	 * @param Id
-	 * @param userId
-	 * @return
+	 * @param Id Item ID Number
+	 * @param userId User ID
+	 * @returnA ResultSet of the results returned
 	 * @throws SQLException
 	 */
 	public ResultSet getItemById(int Id, String userId) throws SQLException{
@@ -142,8 +146,8 @@ public class DbManager {
 	
 	/**
 	 * Returns a list of items belonging to user
-	 * @param userId
-	 * @return
+	 * @param userId User ID
+	 * @return A ResultSet of the results returned
 	 * @throws SQLException
 	 */
 	public ResultSet getItems(String userId) throws SQLException{
@@ -153,9 +157,9 @@ public class DbManager {
 	
 	/**
 	 * Delete an item. Throws an SQLException if item does not exist
-	 * @param user 
-	 * @param itemId
-	 * @throws SQLException
+	 * @param userID User ID
+	 * @param itemId Item ID
+	 * @throws SQLException Thrown if item does not exist.
 	 */
 	public void deleteItemById(String userID, int itemId) throws SQLException{
 		ResultSet test = getItemById(itemId, userID);
@@ -169,7 +173,7 @@ public class DbManager {
 	 * Delete an item. Throws an SQLException if item does not exist.
 	 * @param user
 	 * @param itemKey
-	 * @throws SQLException
+	 * @throws SQLException Thrown if item does not exist
 	 */
 	public void deleteItemByKey(String userID, String itemKey) throws SQLException{
 		ResultSet test = getItemByKey(itemKey, userID);
@@ -205,7 +209,7 @@ public class DbManager {
 	 * Get Playlist by ID
 	 * @param userID
 	 * @param playlistId
-	 * @return
+	 * @return A ResultSet of the results returned
 	 * @throws SQLException
 	 */
 	public ResultSet getPlaylistById(String userID, int playlistId) throws SQLException{
@@ -239,7 +243,7 @@ public class DbManager {
 	 * Delete a playlist
 	 * @param userId
 	 * @param playlistID
-	 * @throws SQLException
+	 * @throws SQLException Thrown if playlist does not exist.
 	 */
 	public void deletePlaylist(String userId, int playlistID) throws SQLException{
 		ResultSet test = getPlaylistById(userId, playlistID);
@@ -255,7 +259,7 @@ public class DbManager {
 	/**
 	 * Gets a list of playlists for a user
 	 * @param userID
-	 * @return
+	 * @return A ResultSet of the results returned
 	 * @throws SQLException 
 	 */
 	public ResultSet getPlaylistsByUser(String userID) throws SQLException{
@@ -267,7 +271,7 @@ public class DbManager {
 	 * Gets the list of items on a playlist
 	 * @param userID
 	 * @param playlistID
-	 * @return
+	 * @return A ResultSet of the results returned
 	 * @throws SQLException
 	 */
 	public ResultSet getPlaylistItemsByID(String userID, int playlistID) throws SQLException{
@@ -316,8 +320,9 @@ public class DbManager {
 	}
 	
 	/**
-	 * Singleton pattern to get and/or initialise DbManager
-	 * @return
+	 * Singleton pattern to get and/or initialise DbManager. 
+	 * If an instance has already been created, changing the parameters will do nothing.
+	 * @return An instance of the DbManager.
 	 * @throws IOException 
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
@@ -336,7 +341,7 @@ public class DbManager {
 	
 	/**
 	 * Convenience method to load the default configuration file.
-	 * @return
+	 * @return An instance of the DbManager.
 	 * @throws IOException
 	 * @throws SQLException
 	 */
