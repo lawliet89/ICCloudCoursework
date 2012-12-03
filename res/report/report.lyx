@@ -31,7 +31,7 @@
 \spacing single
 \use_hyperref false
 \papersize a4paper
-\use_geometry false
+\use_geometry true
 \use_amsmath 1
 \use_esint 1
 \use_mhchem 1
@@ -46,6 +46,10 @@
 \shortcut idx
 \color #008000
 \end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation skip
@@ -105,47 +109,89 @@ Directory Layout
 \end_layout
 
 \begin_layout Itemize
-res/ -- Contains the various template for configuration files to running
- the servlet.
- Includes samples of files that require private personal credentials.
+
+\family typewriter
+res/
+\family default
+ -- Contains the various template for configuration files to running the
+ servlet.
+ Includes samples of configuration files for private credentials.
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-jaas.conf -- The file required for Java to perform Kerberos Configuration.
+
+\family typewriter
+jaas.conf
+\family default
+ -- The file required for Java to perform Kerberos Configuration.
  There is usually no need to touch this file.
- Goes in ROOT/WEB-INF/conf
+ Goes in 
+\family typewriter
+ROOT/WEB-INF/conf
 \end_layout
 
 \begin_layout Itemize
-jets3t.properties -- The end point for the S3 service.
- Goes in ROOT/WEB-INF/properties
+
+\family typewriter
+jets3t.properties
+\family default
+ -- The end point for the S3 service.
+ Goes in 
+\family typewriter
+ROOT/WEB-INF/properties
 \end_layout
 
 \begin_layout Itemize
-krb5.conf -- Contains the necessary Kerberos configuration.
+
+\family typewriter
+krb5.conf 
+\family default
+-- Contains the necessary Kerberos configuration.
  This is setup to use Imperial Kerberos.
- Goes in ROOT/WEB-INF/conf
+ Goes in 
+\family typewriter
+ROOT/WEB-INF/conf
 \end_layout
 
 \begin_layout Itemize
-mime.types -- MIME types definition for libraries.
- Goes in ROOT/WEB-INF/properties
+
+\family typewriter
+mime.types
+\family default
+ -- MIME types definition for libraries.
+ Goes in 
+\family typewriter
+ROOT/WEB-INF/properties
 \end_layout
 
 \begin_layout Itemize
-queries.sql -- The initial SQL queries to create the necessary tables.
+
+\family typewriter
+queries.sql
+\family default
+ -- The initial SQL queries to create the necessary tables.
 \end_layout
 
 \begin_layout Itemize
-s3credentials.properties.sample -- The S3 access keys.
+
+\family typewriter
+s3credentials.properties.sample
+\family default
+ -- The S3 access keys.
  There is no pre-configured file.
  You need to create your own.
- Goes in ROOT/WEB-INF/properties/s3credentials.properties
+ Goes in 
+\family typewriter
+ROOT/WEB-INF/properties/s3credentials.properties
 \end_layout
 
 \begin_layout Itemize
-server.xml -- Your server.xml configuration for Tomcat.
+
+\family typewriter
+server.xml
+\family default
+ -- Your server.xml configuration for Tomcat.
  This is an example set to run by default on HTTPS port 48953.
  If you decide otherwise, 
 \series bold
@@ -153,34 +199,60 @@ you need to edit the Java source code and recompile the client.jar file.
 \end_layout
 
 \begin_layout Itemize
-sql.conf.sample -- A sample for the Postgresql Server credentials.
- Goes in ROOT/WEB-INF/CONF/sql.conf
+
+\family typewriter
+sql.conf.sample
+\family default
+ -- A sample for the Postgresql Server credentials.
+ Goes in 
+\family typewriter
+ROOT/WEB-INF/CONF/sql.conf
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
-ROOT/ -- All the stuff that goes inside your webapps folder on Tomcat.
+
+\family typewriter
+ROOT/
+\family default
+ -- All the stuff that goes inside your webapps folder on Tomcat.
  Contains static web resources.
  Files of particular interest are described below.
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-WEB-INF/lib/client.jar - The compiled source code in a JAR
+
+\family typewriter
+WEB-INF/lib/client.jar
+\family default
+ - The compiled source code in a JAR
 \end_layout
 
 \begin_layout Itemize
-WEB-INF/lib/servlet-api-2.5.jar - The JAR file for Eclipse to reference.
+
+\family typewriter
+WEB-INF/lib/servlet-api-2.5.jar
+\family default
+ - The JAR file for Eclipse to reference.
  Do not include this in your Tomcat deployment.
 \end_layout
 
 \begin_layout Itemize
-WEB-INF/properties & WEB-INF/conf -- Configuration
+
+\family typewriter
+WEB-INF/properties & WEB-INF/conf
+\family default
+ -- Configuration
 \end_layout
 
 \end_deeper
 \begin_layout Itemize
-src/ -- Source code.
+
+\family typewriter
+src/ 
+\family default
+-- Source code.
 \end_layout
 
 \begin_layout Subsection
@@ -196,7 +268,11 @@ The code has been tested to run on Tomcat 6 under Java runtime 1.6.
 \begin_inset Quotes eld
 \end_inset
 
+
+\family typewriter
 net.acperience.cloudplayer.MusicUtility.SECURE_PORT
+\family default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -210,22 +286,35 @@ Setup
 
 \begin_layout Enumerate
 Create a Tomcat context that users port 48953 for HTTPS access.
- Configure Tomcat accordingly with the certificate.
- See res/server.xml for an example.
- If you decide to use another port, edit the integer 
+ Configure Tomcat accordingly with a HTTPS certificate.
+ A certificate can be self-signed.
+ See res/server.xml for an example of server configuration.
+ If you decide to use another port for HTTPS, you have to edit the integer
+ 
 \begin_inset Quotes eld
 \end_inset
 
+
+\family typewriter
 net.acperience.cloudplayer.MusicUtility.SECURE_PORT
+\family default
+
 \begin_inset Quotes erd
 \end_inset
 
- in the source code and recreate a ROOT/WEB-INF/lib/client.jar file with
- the 
+ in the source code and recreate a 
+\family typewriter
+ROOT/WEB-INF/lib/client.jar
+\family default
+ file with the 
+\family typewriter
+
 \begin_inset Quotes eld
 \end_inset
 
 net.acperience.cloudmusic
+\family default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -233,20 +322,37 @@ net.acperience.cloudmusic
 \end_layout
 
 \begin_layout Enumerate
-Copy ROOT/ to the webapps folder of your Tomcat deployment.
+Copy 
+\family typewriter
+ROOT/
+\family default
+ to the webapps folder of your Tomcat deployment.
 \end_layout
 
 \begin_layout Enumerate
-Configure ROOT/WEB-INF/conf/sql.conf according to the sample res/sql.conf.sample
+Configure 
+\family typewriter
+ROOT/WEB-INF/conf/sql.conf
+\family default
+ according to the sample 
+\family typewriter
+res/sql.conf.sample
 \end_layout
 
 \begin_layout Enumerate
-Configure ROOT/WEB-INF/properties/s3Credentials.properties according to the
- sample res/s3credentials.properties.sample
+Configure 
+\family typewriter
+ROOT/WEB-INF/properties/s3Credentials.properties
+\family default
+ according to the sample 
+\family typewriter
+res/s3credentials.properties.sample
 \end_layout
 
 \begin_layout Enumerate
-Create the necessary tables in your database according to res/queries.sql
+Create the necessary tables in your database according to 
+\family typewriter
+res/queries.sql
 \end_layout
 
 \begin_layout Enumerate
@@ -260,13 +366,20 @@ Additional Changes
 \begin_layout Standard
 Some of the properties are hard coded into the Java Source files.
  Look through the top of each class to see what is available.
- Should you wish to change them, you need to recompile the JAR file in ROOT/WEB-
-INF/lib/client.jar.
+ Should you wish to change them, you need to recompile the JAR file in 
+\family typewriter
+ROOT/WEB-INF/lib/client.jar
+\family default
+.
  Export the 
 \begin_inset Quotes eld
 \end_inset
 
+
+\family typewriter
 net.acperience.cloudplayer
+\family default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -275,7 +388,11 @@ net.acperience.cloudplayer
 
 \begin_layout Standard
 Additional configuration options are also available, but not necessary.
- See the conf or properties directory under WEB-INF.
+ See the conf or properties directory under 
+\family typewriter
+WEB-INF
+\family default
+.
 \end_layout
 
 \begin_layout Section
@@ -287,7 +404,11 @@ The package
 \begin_inset Quotes eld
 \end_inset
 
+
+\family typewriter
 net.acperience.cloudmusic
+\family default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -295,60 +416,102 @@ net.acperience.cloudmusic
 \end_layout
 
 \begin_layout Itemize
-DbManager: This class handles the database queries to the Postgresql database.
+
+\family typewriter
+DbManager
+\family default
+: This class handles the database queries to the Postgresql database.
  It creates and retain a single instance of the DbManager class throughout
  the whole lifetime of the Tomcat context.
  
 \end_layout
 
 \begin_layout Itemize
-FileManager: This class handles the file operations related to the music
- files.
+
+\family typewriter
+FileManager
+\family default
+: This class handles the file operations related to the music files.
  It manages the cache and returns the necessary paths and URLs for the client
  to use.
 \end_layout
 
 \begin_layout Itemize
-KerberosAuth: A generic class to handle authentication via Kerberos.
+
+\family typewriter
+KerberosAuth
+\family default
+: A generic class to handle authentication via Kerberos.
  The implementation specific to this application is implemented in MusicKerberos.
 \end_layout
 
 \begin_layout Itemize
-MusicKerberos: The class that handles authentication for the user.
+
+\family typewriter
+MusicKerberos
+\family default
+: The class that handles authentication for the user.
  Also handles the user specific data including the user's buckets.Stores
  authenticated users in HTTP Sessions.
 \end_layout
 
 \begin_layout Itemize
-MusicUtility: Static utility class that contains convenience methods.
+
+\family typewriter
+MusicUtility
+\family default
+: Static utility class that contains convenience methods.
  Including the parsing of simple template files to output to HTML.
 \end_layout
 
 \begin_layout Itemize
-ServletAuth: Servlet that handles authentication for user.
+
+\family typewriter
+ServletAuth
+\family default
+: Servlet that handles authentication for user.
 \end_layout
 
 \begin_layout Itemize
-ServletJSON: Servlet that handles client data requests via AJAX and returns
- them in JSON format.
+
+\family typewriter
+ServletJSON
+\family default
+: Servlet that handles client data requests via AJAX and returns them in
+ JSON format.
 \end_layout
 
 \begin_layout Itemize
-ServletMain: Servlet that outputs the main interface.
+
+\family typewriter
+ServletMain
+\family default
+: Servlet that outputs the main interface.
 \end_layout
 
 \begin_layout Itemize
-ServletStream: Servlet to output user requested music files.
+
+\family typewriter
+ServletStream
+\family default
+: Servlet to output user requested music files.
 \end_layout
 
 \begin_layout Itemize
-ServletUpload: Servlet that handles file uploads.
+
+\family typewriter
+ServletUpload
+\family default
+: Servlet that handles file uploads.
 \end_layout
 
 \begin_layout Standard
 A class diagram is available at the end of the document.
- You can also refer to the Javadoc in res/report/doc for details of the
- class methods.
+ You can also refer to the Javadoc in 
+\family typewriter
+res/report/doc
+\family default
+ for details of the class methods.
 \end_layout
 
 \begin_layout Section
@@ -379,23 +542,568 @@ User playlists and songs are stored locally on a database.
 \begin_layout Standard
 All output sent to the client are handled by the servlets.
  The backend operation are handled by the other classes.
- Only ServletMain and ServletAuth serve HTML content.
- ServletMain will provide the code to run a dynamic HTML5 client on the
- user's browser.
- ServletAuth handles the HTML output to allow user login and handles the
- HTTP POST for login.
- It will then send a redirect to ServletMain when authentication is coimplete.
+ Only 
+\family typewriter
+ServletMain
+\family default
+ and 
+\family typewriter
+ServletAuth
+\family default
+ serve HTML content.
+ 
+\family typewriter
+ServletMain
+\family default
+ will provide the code to run a dynamic HTML5 client on the user's browser.
+ 
+\family typewriter
+ServletAuth
+\family default
+ handles the HTML output to allow user login and handles the HTTP POST for
+ login.
+ It will then send a redirect to 
+\family typewriter
+ServletMain
+\family default
+ when authentication is coimplete.
  
 \end_layout
 
 \begin_layout Standard
-ServletJSON will output the necessary JSON output that will be requested
- from the client code provided by ServletMain.
- ServletUpload handles the HTTP POST request sent by the upload operation
- of the client code provided by ServletMain.
- Finally, ServletStream will provide the necessary binary data for streaming
- of the music files.
- All other operations are provided by ServletJSON.
+
+\family typewriter
+ServletJSON
+\family default
+ will output the necessary JSON output that will be requested from the client
+ code provided by 
+\family typewriter
+ServletMain
+\family default
+.
+ 
+\family typewriter
+ServletUpload
+\family default
+ handles the HTTP POST request sent by the upload operation of the client
+ code provided by 
+\family typewriter
+ServletMain
+\family default
+.
+ Finally, 
+\family typewriter
+ServletStream
+\family default
+ will provide the necessary binary data for streaming of the music files.
+ All other operations are provided by 
+\family typewriter
+ServletJSON
+\family default
+.
+\end_layout
+
+\begin_layout Subsection
+Nonce 
+\end_layout
+
+\begin_layout Standard
+In order to prevent the user from requesting the same operation twice, the
+ application requires the use of 
+\begin_inset Quotes eld
+\end_inset
+
+Nonce
+\begin_inset Quotes erd
+\end_inset
+
+ code along any sensitive operations such as file deletion.
+ Each code is only valid for one use, upon which they are consumed.
+ The HTML client will automatically send requests with the necessary 
+\begin_inset Quotes eld
+\end_inset
+
+Nonce
+\begin_inset Quotes erd
+\end_inset
+
+ code and request for a new one once the operation is complete.
+\end_layout
+
+\begin_layout Subsection
+URL Parameters
+\end_layout
+
+\begin_layout Standard
+This section will list the various URL parameters used to request for data
+ or perform operations.
+ The output is usually returned in JSON.
+\end_layout
+
+\begin_layout Subsubsection
+ServletMain
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ServletMain
+\family default
+ does not take any parameters.
+\end_layout
+
+\begin_layout Subsubsection
+ServletAuth
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ServletAuth
+\family default
+ does not usually require any parameter.
+ Define the HTTP GET parameter 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+\emph on
+logout
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ to request a logout (i.e.
+ 
+\family typewriter
+/
+\emph on
+auth
+\emph default
+?logout
+\family default
+ where 
+\family typewriter
+\emph on
+auth
+\family default
+\emph default
+ is the default configured path for this servlet).
+\end_layout
+
+\begin_layout Subsubsection
+ServletJSON
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ServletJSON
+\family default
+ returns everything in JSON.
+ The default configured path for this servlet is /json.
+ The parameters are:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+list
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Call 
+\family typewriter
+\emph on
+list
+\family default
+\emph default
+ without any other parameters to get a list of all the user's songs.
+ (i.e.
+ 
+\family typewriter
+/json?list
+\family default
+)
+\end_layout
+
+\begin_layout Itemize
+Add the parameter 
+\family typewriter
+\emph on
+playlistId
+\family default
+ 
+\emph default
+to get the items for a playlist (i.e.
+ 
+\family typewriter
+/json?list&playlistid=1
+\family default
+)
+\end_layout
+
+\begin_layout Itemize
+Returns an array of all the items.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+item
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Call 
+\emph on
+item 
+\emph default
+with 
+\family typewriter
+\emph on
+itemKey
+\family default
+\emph default
+ or 
+\family typewriter
+\emph on
+itemId
+\family default
+\emph default
+ for the item's key or ID respectively to get the specific details of an
+ item.
+ 
+\end_layout
+
+\begin_layout Itemize
+(i.e.
+ 
+\family typewriter
+/json?item&itemKey=123.mp3
+\family default
+ or 
+\family typewriter
+/json?item&itemId=1
+\family default
+)
+\end_layout
+
+\begin_layout Itemize
+Returns an array of the item details.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+remove
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Call with 
+\emph on
+itemId
+\emph default
+ to remove a particular item.
+\end_layout
+
+\begin_layout Itemize
+If 
+\emph on
+playlistId
+\emph default
+ is specificed, the item will be removed from the playlist (i.e.
+
+\family typewriter
+ /json?remove&itemId=123&playlistID=3&nonce=xxx
+\family default
+)
+\end_layout
+
+\begin_layout Itemize
+A Nonce code is required for this operation.
+\end_layout
+
+\begin_layout Itemize
+Returns 
+\family typewriter
+\emph on
+true
+\family default
+\emph default
+ in the boolean 
+\family typewriter
+\emph on
+success
+\family default
+ 
+\emph default
+if successful.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+renamePlaylist
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Renames the playlist specified in playlistId to playlistName.
+ Playlists are allowed to have the same name.
+ 
+\end_layout
+
+\begin_layout Itemize
+(i.e.
+ 
+\family typewriter
+/json?renamePlaylist&playlistId=1&playlistName=New%20Name&nonce=xxx
+\family default
+)
+\end_layout
+
+\begin_layout Itemize
+A Nonce code is required for this operation.
+\end_layout
+
+\begin_layout Itemize
+Returns 
+\family typewriter
+\emph on
+true
+\family default
+\emph default
+ in the boolean 
+\family typewriter
+\emph on
+success
+\family default
+ 
+\emph default
+if successful.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+newPlaylist
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Creates a new playlist with the default name 
+\begin_inset Quotes eld
+\end_inset
+
+Untitled New Playlist
+\begin_inset Quotes erd
+\end_inset
+
+.
+ (i.e.
+ 
+\family typewriter
+/json?newPlaylist&nonce=xxx
+\family default
+)
+\end_layout
+
+\begin_layout Itemize
+A Nonce code is required for this operation.
+\end_layout
+
+\begin_layout Itemize
+Returns the details for the new playlist.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+deletePlaylist
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Deletes the playlist specified in playlistId (i.e.
+ 
+\family typewriter
+/json?deletePlaylist&playlistId=1
+\family default
+)
+\end_layout
+
+\begin_layout Itemize
+A Nonce code is required for this operation
+\end_layout
+
+\begin_layout Itemize
+Returns 
+\family typewriter
+\emph on
+true
+\family default
+\emph default
+ in the boolean 
+\family typewriter
+\emph on
+success
+\family default
+ 
+\emph default
+if successful.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+add
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Adds the song specified in 
+\emph on
+itemId
+\emph default
+ to the playlist 
+\emph on
+playlistId
+\emph default
+.
+ (i.e.
+ 
+\family typewriter
+/json?add&itemId=1&playlistId=22
+\family default
+)
+\end_layout
+
+\begin_layout Itemize
+A Nonce code is required for this operation.
+\end_layout
+
+\begin_layout Itemize
+Returns 
+\family typewriter
+\emph on
+true
+\family default
+\emph default
+ in the boolean 
+\family typewriter
+\emph on
+success
+\family default
+ 
+\emph default
+if successful.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+\emph on
+nonce
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Returns a new Nonce code and invalidate the previous one.
+ (i.e.
+ 
+\family typewriter
+/json?nonce
+\family default
+)
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+ServletUpload
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ServletUpload
+\family default
+ does not take any arguments.
+ Any HTML form with file uploads submitted to the form will be processed.
+\end_layout
+
+\begin_layout Subsubsection
+ServletStream
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+ServletStrean
+\family default
+ does not take any HTTP GET arguments.
+ It takes two arguments sepearated by the forward slash 
+\begin_inset Quotes eld
+\end_inset
+
+/
+\begin_inset Quotes erd
+\end_inset
+
+ character after it's configured URL.
+ Let the servlet be configured to handle 
+\family typewriter
+
+\begin_inset Quotes eld
+\end_inset
+
+/stream/
+\begin_inset Quotes erd
+\end_inset
+
+
+\family default
+ addresses.
+ The format of the arguments is then
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+
+\family typewriter
+/stream/userHash/itemKey
+\end_layout
+
+\begin_layout Standard
+where 
+\family typewriter
+userHash
+\family default
+ is the SHA1 hash of the User ID that is handled internally and 
+\family typewriter
+itemKey
+\family default
+ is the key of the item.
 \end_layout
 
 \end_body
