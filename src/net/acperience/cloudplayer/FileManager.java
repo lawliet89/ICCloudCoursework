@@ -257,7 +257,7 @@ public class FileManager {
 						String key = getKey(tag.getFirst(FieldKey.ARTIST), 
 								tag.getFirst(FieldKey.ALBUM), 
 								tag.getFirst(FieldKey.TITLE), 
-								meta.getAudioHeader().getEncodingType());
+								FilenameUtils.getExtension(item.getName()).toLowerCase());
 						
 						jsonCurrent.element("format", meta.getAudioHeader().getFormat());
 						// We are going to try and see if we can get the MIME type of the file. 

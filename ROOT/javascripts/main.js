@@ -7,7 +7,7 @@ var PlaylistManager = {
     initialisePlaylist: function(){
         // Initialise player
         $("#playlistLoading").fadeIn("fast");
-        
+        var is_firefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         this.playlist = new jPlayerPlaylist({
             jPlayer: "#jquery_jplayer_2",
             cssSelectorAncestor: "#jp_container_2"
@@ -15,14 +15,18 @@ var PlaylistManager = {
             playlistOptions: {
                 enableRemoveControls: true
             },
-            swfPath: "javascripts",
-            supplied: "mp3, oga, m4a, wav",
-            wmode: "window"
+            swfPath: "javascripts/Jplayer.swf",
+            supplied: "mp3, m4a, oga, wav",
+            wmode: "window",
+            solution: is_firefox ? "flash, html" : "html, flash"
+            //errorAlerts: true
+            //warningAlerts: true
         });
         this.loadPlaylist(0);
         
         // Load Playlists
         this.loadListOfPlaylists();
+        $("#jplayer_inspector").jPlayerInspector({jPlayer:$("#jquery_jplayer_2")});
     },
     
     loadPlaylist: function(playlistId){
@@ -169,9 +173,9 @@ var PlaylistManager = {
         if (playlistId == undefined || playlistId < 1)
             return;
         if (!confirm("Are you sure you want to delete the playlist? \nThis is irreversible.")) return;
-        $("#playlistLoading").fadeIn("fast");
+        $("#playlistsLoading").fadeIn('fast');
         $.getJSON("/json?deletePlaylist&playlistId="+ playlistId + "&nonce=" + NonceManager.nonce, function(data){
-            $("#playlistLoading").fadeIn("fast");
+            $("#playlistsLoading").fadeOut('fast');
 
             if (data.success == true){
                 NonceManager.getNewNonce();
@@ -200,6 +204,7 @@ var PlaylistManager = {
                          + data.playlistId + '" class="playlistEditable" data-playlistId="' + data.playlistId + '" '
                          + 'onclick="PlaylistManager.loadPlaylist(' + data.playlistId + ');"'
                          + '>' + data.playlistName + '</span>'
+                         + "<img src='/images/page_white_edit.png' title='Rename Playlist' onclick='$(\"#playlist-"+data.playlistId + "\").trigger(\"dblclick\");return false;' class='delete-button' style='margin-left: 5px;'> "
                          + '<img src="/images/delete.png" onclick="PlaylistManager.deletePlaylist(' + data.playlistId + ');" class="delete-button" title="Delete playlist" />'
                          + '</li>';
                          

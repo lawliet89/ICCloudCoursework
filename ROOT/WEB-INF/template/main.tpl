@@ -5,11 +5,12 @@
 <script src="/javascripts/jquery.MultiFile.pack.js" type="text/javascript" language="javascript"></script> 
 <!-- http://www.malsup.com/jquery/form/ -->
 <script src="/javascripts/jquery.form.js" type="text/javascript" language="javascript"></script>
-<script type="text/javascript" src="javascripts/jquery.jplayer.min.js"></script>
-<script type="text/javascript" src="javascripts/jplayer.playlist.js"></script>
-<script type="text/javascript" src="javascripts/jquery.jeditable.mini.js"></script>
-<script type="text/javascript" src="javascripts/jquery-ui-1.9.2.custom.min.js"></script>
-<script type="text/javascript" src="javascripts/main.js"></script>
+<script type="text/javascript" src="/javascripts/jquery.jplayer.min.js"></script>
+<script type="text/javascript" src="/javascripts/jplayer.playlist.js"></script>
+<script type="text/javascript" src="/javascripts/jquery.jplayer.inspector.js"></script>
+<script type="text/javascript" src="/javascripts/jquery.jeditable.mini.js"></script>
+<script type="text/javascript" src="/javascripts/jquery-ui-1.9.2.custom.min.js"></script>
+<script type="text/javascript" src="/javascripts/main.js"></script>
 
 <style type="text/css">
     #playlistUl {
@@ -129,6 +130,7 @@
                 </div>
             </div>
         </div>
+        
     </div>
     
     
@@ -164,6 +166,7 @@
         <div class="five columns">
             <p style="color: #555; font-size: 85%">Tip: Drag and drop songs from the player to the list of playlists to add songs to playlists.</p>
         </div>
+        <div class="five columns" id="jplayer_inspector" style="margin-top:2em;"></div>
     </div>
     
 
