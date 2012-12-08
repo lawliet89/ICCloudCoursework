@@ -48,7 +48,7 @@ public class DbManager {
 	// Playlist Items
 	private PreparedStatement getPlaylistItemsByIDStatement = null;
 	private static final String getPlaylistItemsByIDSQL = "SELECT * FROM cloud_item NATURAL JOIN cloud_playlistitem "
-			+ "NATURAL JOIN cloud_playlist WHERE cloud_item.userid = ? AND cloud_playlist.playlistid= ?"
+			+ "NATURAL JOIN cloud_playlist WHERE cloud_item.userid = ? AND cloud_playlist.playlistid= ? "
 			+ "ORDER BY cloud_item.itemartist, cloud_item.itemalbum, cloud_item.itemtitle;";
 	private PreparedStatement removeItemFromPlaylistStatement = null;
 	private static final String removeItemFromPlaylistSQL = "DELETE FROM cloud_playlistitem WHERE cloud_playlistitem.ItemId IN ("
