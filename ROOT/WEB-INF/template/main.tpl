@@ -165,8 +165,10 @@
         
         <div class="five columns">
             <p style="color: #555; font-size: 85%">Tip: Drag and drop songs from the player to the list of playlists to add songs to playlists.</p>
+            <p style="color: #555; font-size: 85%">Audio formats supported: mp3, aac, m4a, ogg, wav</p>
+            <p style="color: #555; font-size: 85%">Firefox only supports mp3, aac and m4a.</p>
         </div>
-        <div class="five columns" id="jplayer_inspector" style="margin-top:2em;"></div>
+        <div class="five columns" id="jplayer_inspector" style="margin-top:2em; color: #555; font-size: 85%"></div>
     </div>
     
 
