@@ -7,6 +7,8 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServlet;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * A singleton database manager that handles operations with the database. Only one instance is ever created across all servlets.
  * @author Lawliet
@@ -104,12 +106,12 @@ public class DbManager {
 		if (result.next() == true)
 			return result.getInt(1);
 		
-		insertItemStatement.setString(1, userId);
-		insertItemStatement.setString(2, itemTitle);
-		insertItemStatement.setString(3, itemArtist);
-		insertItemStatement.setString(4, itemAlbum);
+		insertItemStatement.setString(1, StringEscapeUtils.escapeHtml(userId));
+		insertItemStatement.setString(2, StringEscapeUtils.escapeHtml(itemTitle));
+		insertItemStatement.setString(3, StringEscapeUtils.escapeHtml(itemArtist));
+		insertItemStatement.setString(4, StringEscapeUtils.escapeHtml(itemAlbum));
 		insertItemStatement.setInt(5, itemYear);
-		insertItemStatement.setString(6, itemKey);
+		insertItemStatement.setString(6, StringEscapeUtils.escapeHtml(itemKey));
 		insertItemStatement.setInt(7, itemDuration);
 		
 		result = null;
@@ -197,7 +199,7 @@ public class DbManager {
 		// Try to see if the user already has something like this
 		ResultSet result;
 		
-		insertPlaylistStatement.setString(1, playlistName);
+		insertPlaylistStatement.setString(1, StringEscapeUtils.escapeHtml(playlistName));
 		insertPlaylistStatement.setString(2, userId);
 		
 		result = null;
