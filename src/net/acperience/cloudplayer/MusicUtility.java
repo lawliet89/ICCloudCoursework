@@ -149,7 +149,7 @@ public final class MusicUtility {
 	 * @return
 	 */
 	public static String sha1(String subject){
-		return DigestUtils.shaHex(subject);
+		return DigestUtils.sha1Hex(subject);
 	}
 	
 	/**

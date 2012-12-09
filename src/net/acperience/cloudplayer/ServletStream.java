@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
@@ -324,7 +323,7 @@ public class ServletStream extends HttpServlet {
     protected void printError(HttpServletResponse response, Exception e) throws IOException{
     	response.setContentType("text/plain;charset=UTF-8");
     	PrintWriter out = response.getWriter();
-    	out.print(ExceptionUtils.getStackTrace(e));
+    	out.print(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(e));
     	out.close();
     }
     // Helpers (can be refactored to public utility class) ----------------------------------------
