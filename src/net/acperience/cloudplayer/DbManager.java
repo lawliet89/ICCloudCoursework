@@ -19,6 +19,7 @@ public class DbManager {
 	public static final String DEFAULT_CONF = "/WEB-INF/conf/sql.conf";
 	private static DbManager instance;
 	private Connection connection;
+	private String uri, user, pass;
 	
 	// List of prepared statements for use
 	// Items management
@@ -61,6 +62,26 @@ public class DbManager {
 	private static final String addItemToPlaylistSQL = "INSERT INTO Cloud_playlistItem VALUES(?,?);";
 	
 	private DbManager(String uri, String user, String pass) throws SQLException{
+		this.uri = uri;
+		this.user = user;
+		this.pass = pass;
+		
+		connect();
+	}
+	
+	private void checkLiveness() throws SQLException{
+		boolean doNotConnect = false;
+		try{
+			if (!connection.isClosed())
+				doNotConnect = true;
+		}
+		finally{
+			if (!doNotConnect)
+				connect();
+		}
+	}
+	
+	private void connect() throws SQLException{
 		connection = DriverManager.getConnection(uri,user,pass);
 		// Items Related
 		insertItemStatement = connection.prepareStatement(insertItemSQL);
@@ -98,7 +119,7 @@ public class DbManager {
 	 */
 	public int insertItem(String userId, String itemTitle, String itemArtist, String itemAlbum, int itemYear, String itemKey, int itemDuration) 
 			throws SQLException {
-		
+		checkLiveness();
 		// Try to see if the user already has something like this
 		ResultSet result = null;
 		result = getItemByKey(itemKey, userId);
@@ -128,6 +149,7 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public ResultSet getItemByKey(String itemKey, String userId) throws SQLException{
+		checkLiveness();
 		getItemByKeyStatement.setString(1, userId);
 		getItemByKeyStatement.setString(2, itemKey);
 		
@@ -142,6 +164,7 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public ResultSet getItemById(int Id, String userId) throws SQLException{
+		checkLiveness();
 		getItemByIdStatement.setInt(2, Id);
 		getItemByIdStatement.setString(1, userId);
 		return getItemByIdStatement.executeQuery();
@@ -154,6 +177,7 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public ResultSet getItems(String userId) throws SQLException{
+		checkLiveness();
 		listItemStatement.setString(1, userId);
 		return listItemStatement.executeQuery();
 	}
@@ -165,6 +189,7 @@ public class DbManager {
 	 * @throws SQLException Thrown if item does not exist.
 	 */
 	public void deleteItemById(String userID, int itemId) throws SQLException{
+		checkLiveness();
 		ResultSet test = getItemById(itemId, userID);
 		if (!test.next())
 			throw new SQLException("Item with ID " + Integer.toString(itemId) + " does not exist.");
@@ -179,6 +204,7 @@ public class DbManager {
 	 * @throws SQLException Thrown if item does not exist
 	 */
 	public void deleteItemByKey(String userID, String itemKey) throws SQLException{
+		checkLiveness();
 		ResultSet test = getItemByKey(itemKey, userID);
 		if (!test.next())
 			throw new SQLException("Item with key " + itemKey + " does not exist.");
@@ -196,6 +222,7 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public int insertPlaylist(String userId, String playlistName) throws SQLException{
+		checkLiveness();
 		// Try to see if the user already has something like this
 		ResultSet result;
 		
@@ -216,6 +243,7 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public ResultSet getPlaylistById(String userID, int playlistId) throws SQLException{
+		checkLiveness();
 		getPlaylistByIdStatement.setString(1, userID);
 		getPlaylistByIdStatement.setInt(2, playlistId);
 		return getPlaylistByIdStatement.executeQuery();
@@ -231,6 +259,7 @@ public class DbManager {
 	 * @throws SQLException Throws an SQLException if no such playlist exists.
 	 */
 	public void renamePlaylistByID(String userID, int playlistID, String playlistName) throws SQLException{
+		checkLiveness();
 		ResultSet test = getPlaylistById(userID, playlistID);
 		
 		if (!test.next())
@@ -249,6 +278,7 @@ public class DbManager {
 	 * @throws SQLException Thrown if playlist does not exist.
 	 */
 	public void deletePlaylist(String userId, int playlistID) throws SQLException{
+		checkLiveness();
 		ResultSet test = getPlaylistById(userId, playlistID);
 		
 		if (!test.next())
@@ -266,6 +296,7 @@ public class DbManager {
 	 * @throws SQLException 
 	 */
 	public ResultSet getPlaylistsByUser(String userID) throws SQLException{
+		checkLiveness();
 		listPlaylistStatement.setString(1, userID);
 		return listPlaylistStatement.executeQuery();
 	}
@@ -278,6 +309,7 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public ResultSet getPlaylistItemsByID(String userID, int playlistID) throws SQLException{
+		checkLiveness();
 		getPlaylistItemsByIDStatement.setString(1, userID);
 		getPlaylistItemsByIDStatement.setInt(2, playlistID);
 		return getPlaylistItemsByIDStatement.executeQuery();
@@ -292,6 +324,7 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public int removeItemFromPlaylist(String userId, int itemId, int playlistId) throws SQLException{
+		checkLiveness();
 		removeItemFromPlaylistStatement.setString(1, userId);
 		removeItemFromPlaylistStatement.setInt(2, itemId);
 		removeItemFromPlaylistStatement.setInt(3, playlistId);
@@ -306,6 +339,7 @@ public class DbManager {
 	 * @throws SQLException
 	 */
 	public void addItemToPlaylist(String userId, int itemId, int playlistId) throws SQLException{
+		checkLiveness();
 		// Test if valid item
 		ResultSet result = getItemById(itemId, userId);
 		if (!result.next())
